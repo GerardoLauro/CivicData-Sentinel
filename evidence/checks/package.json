@@ -1,0 +1,7 @@
+{
+  "build": "wheel",
+  "status": "success",
+  "filename": "civicdata_sentinel-0.1.1-py3-none-any.whl",
+  "sha256": "dd883e5d55c6474714ec5f8240363b10c2596e21cc0d94c1db0cdb432cbe465d",
+  "source_modules_match": 7
+}

@@ -1,0 +1,12 @@
+{
+  "kind": "observed_live_csv_discovery",
+  "rows": 2314,
+  "columns": 24,
+  "csv_sha256": "1f45a5c0770a755c55546ed8975491787f7b08cec3047bff5551502d2e87da1f",
+  "metadata": {
+    "source_url": "https://datos.madrid.es/dataset/300051-0-fuentes/resource/300051-26-fuentes/download/300051-0-fuentes_27_20261105_065355.csv",
+    "source_last_modified": "2026-11-05T06:53:58.311808",
+    "metadata_status": "available"
+  },
+  "matches_archived_csv": true
+}

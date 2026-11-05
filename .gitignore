@@ -1,0 +1,19 @@
+__pycache__/
+.pytest_cache/
+*.egg-info/
+.venv/
+.env
+*.py[cod]
+.DS_Store
+# Local state: scheduled workflow explicitly forces a tracked state DB.
+/state/*.sqlite
+/reports/latest.json
+/demo/
+
+/build/
+/dist/
+/reports/
+/state/
+.ruff_cache/
+.coverage
+/htmlcov/

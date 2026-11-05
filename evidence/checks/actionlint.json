@@ -1,0 +1,8 @@
+{
+  "tool": "actionlint",
+  "version": "1.7.12",
+  "exit_code": 0,
+  "diagnostics": [],
+  "shellcheck_available": false,
+  "github_hosted_run": false
+}

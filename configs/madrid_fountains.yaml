@@ -1,0 +1,39 @@
+# Official dataset: https://datos.madrid.es/dataset/300051-0-fuentes
+# Licensed CC BY 4.0 by Ayuntamiento de Madrid. Data is not bundled.
+# Full CSV and CKAN responses inspected on 2026-11-05.
+dataset_id: madrid_fountains
+primary_key: ID
+source:
+  type: ckan_datastore
+  api_url: https://datos.madrid.es/id/api/3/action
+  resource_id: 300051-26-fuentes
+encoding: utf-8-sig
+# The source uses semicolon as a common format, but delimiter is autodetected.
+required_columns:
+  - ID
+  - ESTADO
+  - LATITUD
+  - LONGITUD
+allowed_values:
+  ESTADO:
+    - OPERATIVO
+    - FUERA_DE_SERVICIO
+    - CERRADA_TEMPORALMENT
+numeric_ranges:
+  LATITUD:
+    min: 40.0
+    max: 41.0
+    allow_blank: true
+    report_blank: true
+  LONGITUD:
+    min: -4.5
+    max: -3.0
+    allow_blank: true
+    report_blank: true
+trim_whitespace: true
+removal_alert_fraction: 0.20
+# These observed ESTADO labels are exact, including the truncated TEMPORALMENT.
+# Unknown future labels produce warnings; they do not imply municipal defects.
+# No freshness alert unless metadata timestamp is provided by CKAN discovery.
+# The declared daily refresh is not proof that content changes every day.
+freshness_max_hours: 72

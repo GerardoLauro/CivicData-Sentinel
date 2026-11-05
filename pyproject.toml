@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "civicdata-sentinel"
+version = "0.1.1"
+description = "Lightweight, explainable monitoring for public CSV datasets"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "CivicData Sentinel contributors"}]
+dependencies = ["httpx>=0.25,<1", "PyYAML>=6,<7"]
+
+[project.optional-dependencies]
+dashboard = ["streamlit>=1.50,<2"]
+test = ["pytest>=8,<10"]
+
+[project.scripts]
+sentinel = "civicdata_sentinel.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = ["dashboard: requires the optional Streamlit dependency"]
