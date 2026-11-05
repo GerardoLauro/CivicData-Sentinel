@@ -1,5 +1,5 @@
 # Official dataset: https://datos.madrid.es/dataset/300051-0-fuentes
-# Licensed CC BY 4.0 by Ayuntamiento de Madrid. Data is not bundled.
+# Licensed CC BY 4.0 by Ayuntamiento de Madrid; attributed evidence is bundled.
 # Full CSV and CKAN responses inspected on 2026-11-05.
 dataset_id: madrid_fountains
 primary_key: ID
@@ -37,3 +37,18 @@ removal_alert_fraction: 0.20
 # No freshness alert unless metadata timestamp is provided by CKAN discovery.
 # The declared daily refresh is not proof that content changes every day.
 freshness_max_hours: 72
+
+title: Madrid · Drinking fountains
+description: Drinking fountain inventory with operational state and coordinate completeness checks.
+catalog_url: https://datos.madrid.es/dataset/300051-0-fuentes
+license: CC BY 4.0 · Ayuntamiento de Madrid
+comparison:
+  numeric_columns: [LATITUD, LONGITUD]
+checks:
+  - id: district-completeness
+    kind: completeness
+    column: DISTRITO
+    max_missing_fraction: 0.02
+    severity: warning
+policy:
+  quarantine_removed_fraction: 0.5

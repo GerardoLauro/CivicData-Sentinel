@@ -1,33 +1,168 @@
-"""Minimal command line interface."""
+"""CLI for contracts, collection, evidence review, replay and operations."""
+
 from __future__ import annotations
+
 import argparse
 import json
+import sqlite3
+import sys
 from pathlib import Path
-from .monitor import run
-from .storage import connect, recent_runs
+
+from filelock import FileLock, Timeout
+
+from . import __version__
+from .comparison import semantic_diff
+from .config import Dataset, catalog
+from .exporting import event_csv, report_export
+from .logging_config import configure
+from .monitor import RANK, atomic_json, run, run_catalog
+from .replay import replay
+from .storage import (
+    IntegrityError,
+    backup,
+    connect,
+    get_run,
+    incidents,
+    integrity,
+    outbox,
+    promote,
+    read_snapshot,
+    readonly,
+    recent_runs,
+)
 
 
-def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="sentinel", description="Explainable open-data change monitor")
-    subs = parser.add_subparsers(dest="command", required=True)
-    run_p = subs.add_parser("run", help="Check a dataset and update local history")
-    run_p.add_argument("--config", default="configs/madrid_fountains.yaml")
-    run_p.add_argument("--db", default="state/sentinel.sqlite")
-    run_p.add_argument("--input", help="Use a local CSV rather than the network (useful for tests)")
-    run_p.add_argument("--output", default="reports/latest.json")
-    list_p = subs.add_parser("history", help="List recent checks")
-    list_p.add_argument("--db", default="state/sentinel.sqlite")
-    list_p.add_argument("--dataset", default=None)
-    args = parser.parse_args(argv)
-    if args.command == "run":
-        report = run(args.config, args.db, input_file=args.input, output=args.output)
-        print(json.dumps({k: report[k] for k in ["dataset_id", "status", "stats", "issues", "unchanged_snapshot"] if k in report}, ensure_ascii=False, indent=2))
-        return 0 if report["status"] == "success" else 1
-    if args.command == "history":
-        with connect(args.db) as con:
-            print(json.dumps(recent_runs(con, args.dataset), ensure_ascii=False, indent=2))
-        return 0
-    return 2
+def parser():
+    main = argparse.ArgumentParser(prog="sentinel", description="Evidence-first public data monitoring")
+    main.add_argument("--version", action="version", version=__version__)
+    sub = main.add_subparsers(dest="command", required=True)
+    single = sub.add_parser("run", help="Collect a dataset and evaluate its contract")
+    single.add_argument("--config", default="configs/madrid_fountains.yaml")
+    single.add_argument("--input", help="Local CSV; isolated from live comparison history")
+    single.add_argument("--output", default="reports/latest.json")
+    many = sub.add_parser("run-all", help="Validate and collect an entire YAML catalog")
+    many.add_argument("--configs", default="configs")
+    many.add_argument("--output-dir", default="reports")
+    for item in (single, many):
+        item.add_argument("--fail-on", choices=["warning", "error", "critical"], default=None)
+    listing = sub.add_parser("catalog", help="Validate and list dataset contracts")
+    listing.add_argument("--configs", default="configs")
+    schema = sub.add_parser("config-schema", help="Export machine-readable contract JSON Schema")
+    schema.add_argument("--output", default="docs/config.schema.json")
+    history = sub.add_parser("history", help="Paginated audit history")
+    history.add_argument("--dataset")
+    history.add_argument("--limit", type=int, default=30)
+    history.add_argument("--offset", type=int, default=0)
+    for name in ("show", "export", "replay", "approve"):
+        item = sub.add_parser(name)
+        item.add_argument("--run", type=int, required=True)
+        if name == "export":
+            item.add_argument("--format", choices=["json", "csv", "jsonl"], default="json")
+            item.add_argument("--output", required=True)
+        if name == "approve":
+            item.add_argument("--reason", required=True)
+    compare = sub.add_parser("diff", help="Compare two compatible stored snapshots")
+    compare.add_argument("--before", type=int, required=True)
+    compare.add_argument("--after", type=int, required=True)
+    alerts = sub.add_parser("alerts", help="Deduplicated incident-transition outbox; no messages sent")
+    alerts.add_argument("--after", type=int, default=0)
+    incident = sub.add_parser("incidents")
+    incident.add_argument("--state", choices=["open", "resolved"])
+    sub.add_parser("verify", help="Check SQLite plus snapshot/artifact/report/event hashes")
+    sub.add_parser("migrate", help="Additively upgrade an existing 0.1 database; back it up first")
+    snapshot = sub.add_parser("backup", help="Create a consistent portable SQLite backup")
+    snapshot.add_argument("--output", required=True)
+    for name, item in sub.choices.items():
+        if name not in {"catalog", "config-schema"}:
+            item.add_argument("--db", default="state/sentinel.sqlite")
+    return main
+
+
+def main(argv=None):
+    args = parser().parse_args(argv)
+    configure()
+    code = 0
+    try:
+        if args.command == "catalog":
+            value = [
+                {"path": str(p), "dataset_id": c["dataset_id"], "title": c["title"], "source": c["source"]["type"]}
+                for p, c in catalog(args.configs)
+            ]
+        elif args.command == "config-schema":
+            atomic_json(args.output, Dataset.model_json_schema())
+            value = {"output": args.output}
+        elif args.command == "run":
+            value = run(args.config, args.db, input_file=args.input, output=args.output)
+            code = 1 if value["status"] == "failed" else 2 if value["status"] == "quarantined" else 0
+            if code == 0 and args.fail_on and RANK[value["max_severity"]] >= RANK[args.fail_on]:
+                code = 3
+        elif args.command == "run-all":
+            value = run_catalog(args.configs, args.db, args.output_dir)
+            code = 0 if value["successful"] == value["total"] else 1
+            if args.fail_on:
+                for row in value["datasets"]:
+                    with readonly(args.db) as con:
+                        severity = get_run(con, row["run_id"])["max_severity"]
+                    if RANK[severity] >= RANK[args.fail_on]:
+                        code = code or 3
+        elif args.command == "backup":
+            value = backup(args.db, args.output)
+        elif args.command in {"approve", "migrate"}:
+            with FileLock(str(args.db) + ".lock", timeout=15), connect(args.db) as con:
+                value = promote(con, args.run, args.reason) if args.command == "approve" else {"schema_version": 2}
+        else:
+            with readonly(args.db) as con:
+                if args.command == "history":
+                    if not 1 <= args.limit <= 10000 or args.offset < 0:
+                        raise ValueError("limit must be 1..10000 and offset >= 0")
+                    value = recent_runs(con, args.dataset, args.limit, args.offset)
+                elif args.command == "show":
+                    value = get_run(con, args.run)
+                elif args.command == "export":
+                    value = report_export(con, args.run)
+                    if args.format == "json":
+                        atomic_json(args.output, value)
+                    else:
+                        path = Path(args.output)
+                        path.parent.mkdir(parents=True, exist_ok=True)
+                        content = (
+                            event_csv(value["events"])
+                            if args.format == "csv"
+                            else "".join(json.dumps(e, ensure_ascii=False) + "\n" for e in value["events"])
+                        )
+                        path.write_text(content, encoding="utf-8")
+                    value = {"output": args.output, "events_exported": len(value["events"])}
+                elif args.command == "replay":
+                    value = replay(con, args.run)
+                    code = 0 if value["reproduced"] else 1
+                elif args.command == "incidents":
+                    value = incidents(con, args.state)
+                elif args.command == "alerts":
+                    value = outbox(con, args.after)
+                elif args.command == "verify":
+                    value = integrity(con)
+                    code = 0 if value["ok"] else 1
+                elif args.command == "diff":
+                    left, right = get_run(con, args.before), get_run(con, args.after)
+                    if (
+                        left["dataset_id"] != right["dataset_id"]
+                        or left.get("comparison_signature") != right.get("comparison_signature")
+                        or left["source"].get("input_kind") != right["source"].get("input_kind")
+                    ):
+                        raise ValueError("Snapshots must have the same dataset, stream and comparison contract")
+                    if not left["digest"] or not right["digest"]:
+                        raise ValueError("Both runs must contain valid snapshots")
+                    stats, events, findings = semantic_diff(
+                        read_snapshot(con, left["dataset_id"], left["digest"]),
+                        read_snapshot(con, right["dataset_id"], right["digest"]),
+                        right["config"],
+                    )
+                    value = {"stats": stats, "events": events, "issues": findings}
+        print(json.dumps(value, ensure_ascii=False, indent=2))
+        return code
+    except (ValueError, OSError, sqlite3.Error, IntegrityError, Timeout) as exc:
+        print(json.dumps({"error": str(exc)}, ensure_ascii=False), file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":

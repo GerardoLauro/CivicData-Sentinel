@@ -1,9 +1,11 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
 import pytest
+
 from civicdata_sentinel.config import load_config
-from civicdata_sentinel.ingestion import parse_csv, IngestionError
-from civicdata_sentinel.engine import canonicalize, diff, fingerprint, check_freshness
+from civicdata_sentinel.engine import canonicalize, check_freshness, diff, fingerprint
+from civicdata_sentinel.ingestion import IngestionError, parse_csv
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "configs/madrid_fountains.yaml"
@@ -95,4 +97,6 @@ def test_missing_coordinates_are_counted_without_rejecting_rows():
     records, issues, valid = canonicalize(rows, fields, cfg)
     assert valid and "001" in records
     assert {(i["code"], i["column"], i["count"]) for i in issues} == {
-        ("missing_numeric_values", "LATITUD", 1), ("missing_numeric_values", "LONGITUD", 1)}
+        ("missing_numeric_values", "LATITUD", 1),
+        ("missing_numeric_values", "LONGITUD", 1),
+    }

@@ -1,55 +1,51 @@
-name: Daily Madrid data check
+name: Monitor public datasets
 'on':
   workflow_dispatch:
   schedule:
-    - cron: '23 7 * * *'
+    - cron: '17 * * * *'
 permissions:
   contents: write
 concurrency:
-  group: civicdata-monitor
+  group: sentinel-state-writer
   cancel-in-progress: false
 jobs:
-  check:
+  monitor:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - run: python -m pip install -e .
-      - name: Refresh persisted state before acquisition
-        run: git pull --ff-only
-      - name: Run monitor and retain outcome
+      - name: Restore trusted state
+        run: python scripts/state_branch.py restore
+      - name: Collect all contracts
         shell: bash
         run: |
           set +e
-          sentinel run --config configs/madrid_fountains.yaml --db state/sentinel.sqlite --output reports/latest.json
+          sentinel run-all --db state/sentinel.sqlite --output-dir reports
           code=$?
           echo "RUN_EXIT_CODE=$code" >> "$GITHUB_ENV"
           exit 0
-      - name: Retain evidence even when persistence fails
+      - name: Create portable audit backup
+        if: ${{ always() && env.RUN_EXIT_CODE != '' }}
+        run: |
+          sentinel backup --db state/sentinel.sqlite --output backups/sentinel.sqlite
+          sentinel alerts --db state/sentinel.sqlite > reports/incident-transitions.json
+      - name: Persist state on separate branch
+        if: ${{ always() && env.RUN_EXIT_CODE != '' }}
+        run: python scripts/state_branch.py persist
+      - name: Retain evidence even if state push fails
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: madrid-check-${{ github.run_id }}
+          name: sentinel-check-${{ github.run_id }}
           path: |
-            reports/latest.json
-            state/sentinel.sqlite
+            reports/
+            backups/sentinel.sqlite
           if-no-files-found: warn
-      - name: Save history and latest report in repository
-        if: ${{ always() && env.RUN_EXIT_CODE != '' }}
-        shell: bash
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f state/sentinel.sqlite reports/latest.json
-          if ! git diff --cached --quiet; then
-            git commit -m "chore(data): store Madrid check [skip ci]"
-            git push
-          fi
-      - name: Fail workflow when ingestion failed
+          retention-days: 30
+      - name: Surface unsuccessful acquisition or quarantine
         if: ${{ always() && env.RUN_EXIT_CODE != '' && env.RUN_EXIT_CODE != '0' }}
         run: exit 1

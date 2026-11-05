@@ -1,5 +1,5 @@
 from pathlib import Path
-import sqlite3
+
 from civicdata_sentinel.monitor import run
 from civicdata_sentinel.storage import connect, load_previous, recent_runs
 
@@ -49,11 +49,15 @@ def test_failure_does_not_corrupt_previous_baseline(tmp_path):
 
 def test_network_failure_is_reported_and_prior_state_is_preserved(tmp_path, monkeypatch):
     import civicdata_sentinel.monitor as monitor
+
     db = tmp_path / "history.sqlite"
     base = run(CFG, db, input_file=FIX / "fountains_base.csv")
+
     def broken_fetch(_):
         from civicdata_sentinel.ingestion import IngestionError
+
         raise IngestionError("Simulated network outage")
+
     monkeypatch.setattr(monitor, "fetch_csv", broken_fetch)
     failed = run(CFG, db)
     assert failed["status"] == "failed"

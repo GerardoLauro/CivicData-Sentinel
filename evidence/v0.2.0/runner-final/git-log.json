@@ -1,0 +1,136 @@
+[
+  {
+    "args": [
+      "init",
+      "--bare",
+      "--initial-branch=main",
+      "C:\\Users\\Micro\\Desktop\\CivicData-Sentinel\\evidence\\v0.2.0\\runner-final\\.runner-test-ayvexfv4\\remote.git"
+    ],
+    "exit_code": 0,
+    "stdout": "Initialized empty Git repository in C:/Users/Micro/Desktop/CivicData-Sentinel/evidence/v0.2.0/runner-final/.runner-test-ayvexfv4/remote.git/\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "init",
+      "--initial-branch=main"
+    ],
+    "exit_code": 0,
+    "stdout": "Initialized empty Git repository in C:/Users/Micro/Desktop/CivicData-Sentinel/evidence/v0.2.0/runner-final/.runner-test-ayvexfv4/seed/.git/\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "-c",
+      "user.name=Local verification",
+      "-c",
+      "user.email=local@example.invalid",
+      "commit",
+      "--allow-empty",
+      "-m",
+      "Synthetic runner test"
+    ],
+    "exit_code": 0,
+    "stdout": "[main (root-commit) 78a8b18] Synthetic runner test\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "remote",
+      "add",
+      "origin",
+      "C:\\Users\\Micro\\Desktop\\CivicData-Sentinel\\evidence\\v0.2.0\\runner-final\\.runner-test-ayvexfv4\\remote.git"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "push",
+      "-u",
+      "origin",
+      "main"
+    ],
+    "exit_code": 0,
+    "stdout": "branch 'main' set up to track 'origin/main'.\n",
+    "stderr": "To C:\\Users\\Micro\\Desktop\\CivicData-Sentinel\\evidence\\v0.2.0\\runner-final\\.runner-test-ayvexfv4\\remote.git\n * [new branch]      main -> main\n"
+  },
+  {
+    "args": [
+      "rev-parse",
+      "HEAD"
+    ],
+    "exit_code": 0,
+    "stdout": "78a8b189dbf7e5b24ae89bdf6b4ec82902b59479\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "clone",
+      "C:\\Users\\Micro\\Desktop\\CivicData-Sentinel\\evidence\\v0.2.0\\runner-final\\.runner-test-ayvexfv4\\remote.git",
+      "C:\\Users\\Micro\\Desktop\\CivicData-Sentinel\\evidence\\v0.2.0\\runner-final\\.runner-test-ayvexfv4\\runner-1"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": "Cloning into 'C:\\Users\\Micro\\Desktop\\CivicData-Sentinel\\evidence\\v0.2.0\\runner-final\\.runner-test-ayvexfv4\\runner-1'...\ndone.\n"
+  },
+  {
+    "args": [
+      "rev-parse",
+      "HEAD"
+    ],
+    "exit_code": 0,
+    "stdout": "78a8b189dbf7e5b24ae89bdf6b4ec82902b59479\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "clone",
+      "C:\\Users\\Micro\\Desktop\\CivicData-Sentinel\\evidence\\v0.2.0\\runner-final\\.runner-test-ayvexfv4\\remote.git",
+      "C:\\Users\\Micro\\Desktop\\CivicData-Sentinel\\evidence\\v0.2.0\\runner-final\\.runner-test-ayvexfv4\\runner-2"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": "Cloning into 'C:\\Users\\Micro\\Desktop\\CivicData-Sentinel\\evidence\\v0.2.0\\runner-final\\.runner-test-ayvexfv4\\runner-2'...\ndone.\n"
+  },
+  {
+    "args": [
+      "rev-parse",
+      "HEAD"
+    ],
+    "exit_code": 0,
+    "stdout": "78a8b189dbf7e5b24ae89bdf6b4ec82902b59479\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "clone",
+      "C:\\Users\\Micro\\Desktop\\CivicData-Sentinel\\evidence\\v0.2.0\\runner-final\\.runner-test-ayvexfv4\\remote.git",
+      "C:\\Users\\Micro\\Desktop\\CivicData-Sentinel\\evidence\\v0.2.0\\runner-final\\.runner-test-ayvexfv4\\runner-3"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": "Cloning into 'C:\\Users\\Micro\\Desktop\\CivicData-Sentinel\\evidence\\v0.2.0\\runner-final\\.runner-test-ayvexfv4\\runner-3'...\ndone.\n"
+  },
+  {
+    "args": [
+      "rev-parse",
+      "HEAD"
+    ],
+    "exit_code": 0,
+    "stdout": "78a8b189dbf7e5b24ae89bdf6b4ec82902b59479\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "ls-remote",
+      "--heads",
+      "origin",
+      "refs/heads/main"
+    ],
+    "exit_code": 0,
+    "stdout": "78a8b189dbf7e5b24ae89bdf6b4ec82902b59479\trefs/heads/main\n",
+    "stderr": ""
+  }
+]

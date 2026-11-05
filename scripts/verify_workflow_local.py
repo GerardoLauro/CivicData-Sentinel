@@ -1,94 +1,114 @@
-"""Execute monitor workflow shell blocks against a LOCAL bare Git remote.
+"""Exercise the actual state-branch protocol with fresh LOCAL runner clones.
 
-Synthetic CSV inputs replace the live request only. No GitHub account is used.
-This tests state persistence, fresh runners and failure retention, not GitHub's
-scheduler, credentials, branch permissions or upload-artifact service.
+All monitoring input is synthetic. No GitHub service, account or token is used.
 """
+
 from __future__ import annotations
+
 import argparse
+import importlib.util
 import json
-import os
-from pathlib import Path
-import shutil
-import sqlite3
 import subprocess
-import sys
-import yaml
+import tempfile
+from pathlib import Path
+
+from civicdata_sentinel.monitor import run
+from civicdata_sentinel.storage import integrity, load_previous, readonly
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--shell", default="bash", help="Bash-compatible executable")
-    parser.add_argument("--output", type=Path, required=True, help="New disposable directory")
-    args = parser.parse_args()
-    root = Path(__file__).resolve().parents[1]
-    output = args.output.resolve()
+def verify(output):
+    output = Path(output).resolve()
     output.mkdir(parents=True, exist_ok=False)
-    logs = []
+    root = Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location("state_branch", root / "scripts/state_branch.py")
+    state = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(state)
+    log = []
 
-    def execute(command, cwd, env=None, expected=0):
-        result = subprocess.run(command, cwd=cwd, env=env, capture_output=True, text=True)
-        logs.append({"command": command, "exit_code": result.returncode,
-                     "stdout": result.stdout, "stderr": result.stderr})
-        if result.returncode != expected:
-            raise RuntimeError(result.stderr or result.stdout)
-        return result
+    def git(*args, cwd):
+        result = subprocess.run(["git", *args], cwd=cwd, capture_output=True, text=True)
+        log.append(
+            {"args": list(args), "exit_code": result.returncode, "stdout": result.stdout, "stderr": result.stderr}
+        )
+        if result.returncode:
+            raise RuntimeError(result.stderr)
+        return result.stdout.strip()
 
-    remote = output / "remote.git"
-    execute(["git", "init", "--bare", "--initial-branch=main", str(remote)], output)
-    seed = output / "seed"
-    seed.mkdir()
-    for name in (".github", "configs", "tests", "src"):
-        shutil.copytree(root / name, seed / name, ignore=shutil.ignore_patterns("__pycache__"))
-    shutil.copy2(root / ".gitignore", seed / ".gitignore")
-    execute(["git", "init", "--initial-branch=main"], seed)
-    execute(["git", "add", "."], seed)
-    execute(["git", "-c", "user.name=Local verification", "-c", "user.email=local@example.invalid",
-             "commit", "-m", "synthetic workflow verification"], seed)
-    execute(["git", "remote", "add", "origin", str(remote)], seed)
-    execute(["git", "push", "-u", "origin", "main"], seed)
-    steps = yaml.safe_load((root / ".github/workflows/monitor.yml").read_text())["jobs"]["check"]["steps"]
-    blocks = {step["name"]: step["run"] for step in steps if "name" in step and "run" in step}
-    observed = []
-    baseline = None
-    for index, fixture in enumerate(("fountains_base.csv", "fountains_changed.csv", "fountains_invalid.csv"), 1):
-        runner = output / f"runner-{index}"
-        execute(["git", "clone", str(remote), str(runner)], output)
-        env = dict(os.environ, GITHUB_ENV=(runner / "github-env").as_posix())
-        execute([args.shell, "-ec", blocks["Refresh persisted state before acquisition"]], runner, env)
-        command = blocks["Run monitor and retain outcome"].replace(
-            "sentinel run", f'"{Path(sys.executable).as_posix()}" -m civicdata_sentinel.cli run --input tests/fixtures/{fixture}')
-        execute([args.shell, "-ec", command], runner, env)
-        code = int((runner / "github-env").read_text().strip().split("=")[1])
-        assert code == (1 if index == 3 else 0)
-        execute([args.shell, "-ec", blocks["Save history and latest report in repository"]], runner, env)
-        # The final workflow condition is evaluated by GitHub; emulate that branch.
-        if code:
-            execute([args.shell, "-ec", blocks["Fail workflow when ingestion failed"]], runner, env, expected=1)
-        report = json.loads((runner / "reports/latest.json").read_text(encoding="utf-8"))
-        with sqlite3.connect(runner / "state/sentinel.sqlite") as con:
-            assert con.execute("SELECT COUNT(*) FROM runs").fetchone()[0] == index
-            snapshot_count = con.execute("SELECT COUNT(*) FROM snapshots").fetchone()[0]
-        if index == 1:
-            assert report["stats"]["baseline"]
-        if index == 2:
-            assert (report["stats"]["added"], report["stats"]["removed"], report["stats"]["modified"]) == (1, 1, 1)
-            baseline = report["digest"]
-        if index == 3:
-            assert report["status"] == "failed" and report["stats"] is None and report["events"] == []
-            from civicdata_sentinel.storage import connect, load_previous
-            with connect(runner / "state/sentinel.sqlite") as con:
-                assert load_previous(con, "madrid_fountains")[0] == baseline
-            assert snapshot_count == 2
-        observed.append({"synthetic_input": fixture, "exit_code": code,
-                         "status": report["status"], "stored_runs": index, "snapshots": snapshot_count})
-    summary = {"kind": "local_workflow_simulation_synthetic_inputs", "observed": observed,
-               "github_execution": False, "artifact_upload_tested": False,
-               "shell_blocks_source": ".github/workflows/monitor.yml"}
-    (output / "summary.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
-    (output / "execution-log.json").write_text(json.dumps(logs, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps(summary, indent=2))
+    with tempfile.TemporaryDirectory(prefix=".runner-test-", dir=output) as folder:
+        work = Path(folder)
+        assert work.is_relative_to(output)
+        remote, seed = work / "remote.git", work / "seed"
+        git("init", "--bare", "--initial-branch=main", str(remote), cwd=work)
+        seed.mkdir()
+        git("init", "--initial-branch=main", cwd=seed)
+        git(
+            "-c",
+            "user.name=Local verification",
+            "-c",
+            "user.email=local@example.invalid",
+            "commit",
+            "--allow-empty",
+            "-m",
+            "Synthetic runner test",
+            cwd=seed,
+        )
+        git("remote", "add", "origin", str(remote), cwd=seed)
+        git("push", "-u", "origin", "main", cwd=seed)
+        initial = git("rev-parse", "HEAD", cwd=seed)
+        observed, previous = [], None
+        for index, fixture in enumerate(("fountains_base.csv", "fountains_changed.csv", "fountains_invalid.csv"), 1):
+            runner = work / f"runner-{index}"
+            git("clone", str(remote), str(runner), cwd=work)
+            db = runner / "state/sentinel.sqlite"
+            restored = state.restore(runner, db)
+            report = run(root / "configs/madrid_fountains.yaml", db, input_file=root / "tests/fixtures" / fixture)
+            if index < 3:
+                assert report["status"] == "success"
+                previous = report["digest"]
+            else:
+                assert report["status"] == "failed" and report["events"] == []
+            saved = state.persist(runner, db)
+            with readonly(db) as con:
+                assert integrity(con)["ok"]
+                assert load_previous(con, "madrid_fountains")[0] == previous
+                count = con.execute("SELECT COUNT(*) FROM runs").fetchone()[0]
+                assert count == index
+            observed.append(
+                {
+                    "synthetic_input": fixture,
+                    "status": report["status"],
+                    "restored": restored["restored"],
+                    "runs": count,
+                    "persisted": saved["persisted"],
+                }
+            )
+            assert git("rev-parse", "HEAD", cwd=runner) == initial
+        # Runner 2 has a stale parent marker after runner 3 pushed its state.
+        try:
+            state.persist(work / "runner-2", work / "runner-2/state/sentinel.sqlite")
+        except ValueError:
+            rejected = True
+        else:
+            rejected = False
+        assert rejected
+        assert git("ls-remote", "--heads", "origin", "refs/heads/main", cwd=seed).split()[0] == initial
+    result = {
+        "kind": "synthetic_local_state_branch_integration",
+        "observed": observed,
+        "source_branch_unchanged": True,
+        "concurrent_update_rejected": rejected,
+        "github_hosted": False,
+        "artifact_upload_tested": False,
+        "temporary_clones_removed": True,
+    }
+    (output / "summary.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    # Relative Git arguments only; no tokens or account metadata are queried.
+    (output / "git-log.json").write_text(json.dumps(log, indent=2) + "\n", encoding="utf-8")
+    return result
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    print(json.dumps(verify(args.output), indent=2))

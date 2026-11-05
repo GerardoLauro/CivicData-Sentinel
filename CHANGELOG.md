@@ -1,6 +1,22 @@
 # Changelog
 
-## 0.1.1 — 2026-11-05
+## 0.2.0 — 2026-11-05
+
+- Three independent Madrid contracts: fountains, hourly air, parking inventory.
+- Validated configuration schema, composite IDs and configurable hourly unpivot.
+- Schema/profile tracking and explainable conditional quality/freshness rules.
+- Explicit numeric equivalence, tolerances and rolling-window classification.
+- Candidate quarantine, audited approval and separate live/local trusted heads.
+- Complete stored events, hashed artifacts, integrity checks and offline replay.
+- Incident lifecycle, deduplicated outbox, structured logs and operational CLI.
+- Read-only observatory with filters, timeline, record details and full exports.
+- Separate state branch, verified SQLite backups and concurrent-update rejection.
+- Extended failure/property/CLI/local-runner tests, lint and dependency audit.
+- Python 3.11+ required for the corrected filelock dependency.
+- No GitHub publication or external notifications.
+
+
+## 0.1.1 â€” 2026-11-05
 
 Continues the supplied 0.1.0 archive (SHA-256
 `ef87e52ed2ea8cbaae02c81c128bcc8f7562e31ab54f6c777ed4e23e61d2628c`).

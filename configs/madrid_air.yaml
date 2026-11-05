@@ -1,0 +1,52 @@
+config_version: 1
+dataset_id: madrid_air
+title: Madrid · Hourly air measurements
+description: Provisional hourly observations; invalid/future slots are retained but excluded from numeric and freshness checks.
+catalog_url: https://datos.madrid.es/dataset/212531-0-calidad-aire-tiempo-real
+license: CC BY 4.0 · Ayuntamiento de Madrid
+source:
+  type: json
+  url: https://ciudadesabiertas.madrid.es/dynamicAPI/API/query/calair_tiemporeal.json?pageSize=4500
+  records_path: records
+  total_path: totalRecords
+  page_param: page
+primary_key: [PUNTO_MUESTREO, observed_at]
+unpivot:
+  id_columns: [PROVINCIA, MUNICIPIO, ESTACION, MAGNITUD, PUNTO_MUESTREO]
+  date_columns: [ANO, MES, DIA]
+  value_pattern: H??
+  flag_prefix: V
+  timezone: Europe/Madrid
+required_columns: [PUNTO_MUESTREO, observed_at, value, validity]
+trim_whitespace: true
+comparison:
+  numeric_columns: [value]
+  rolling_column: observed_at
+checks:
+  - id: validity-vocabulary
+    kind: domain
+    column: validity
+    values: [V, N]
+    severity: warning
+  - id: numeric-observations
+    kind: numeric
+    column: value
+    min: -10
+    max: 100000
+    when: {column: validity, equals: V}
+    severity: warning
+  - id: observation-freshness
+    kind: freshness
+    column: observed_at
+    when: {column: validity, equals: V}
+    max_age_hours: 4
+    max_future_hours: 2
+    severity: error
+  - id: sample-key
+    kind: regex
+    column: PUNTO_MUESTREO
+    pattern: '^[0-9]{8}_[0-9]+_[A-Za-z0-9]+$'
+    severity: error
+max_interval_hours: 4
+policy:
+  quarantine_removed_fraction: 0.5

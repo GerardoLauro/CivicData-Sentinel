@@ -1,0 +1,10 @@
+include LICENSE README.md CHANGELOG.md AGENTS.md Start-Dashboard.cmd
+recursive-include configs *.yaml
+recursive-include dashboard *.py
+recursive-include scripts *.py
+recursive-include docs *.md *.json
+recursive-include tests *.py *.csv
+recursive-include .github *.yml
+include .streamlit/config.toml
+include evidence/NOTICE.md
+include evidence/2026-11-05/history.sqlite

@@ -1,43 +1,38 @@
-# Architecture and acceptance criteria
+# Architecture
 
-`HTTPS source -> CSV / paginated CKAN -> structural validation -> quality checks -> canonical SHA-256 -> previous successful snapshot -> semantic diff -> SQLite + JSON`
+Validated YAML -> bounded HTTPS adapter -> parser input -> conservative normalization
+-> structural gate -> profile and quality rules -> semantic comparison -> trust
+decision -> single SQLite transaction -> atomic report file.
 
-Required columns and nonblank unique primary keys are structural gates. A rejected
-snapshot or failed request records a failure with no diff and cannot replace the
-last accepted baseline. Missing coordinates and unknown status labels are quality
-warnings; accepted records remain available for comparison.
+Pydantic validates nested options and rejects unknown fields. CSV, CKAN discovery,
+CKAN pagination and flat JSON envelopes share bounded HTTP acquisition with three
+attempts for transient failures. Hourly unpivot is configured separately from the
+source adapter. Composite identities use JSON tuples to avoid delimiter collisions.
 
-Each run is an audit attempt, successful or failed. Each snapshot is an immutable,
-gzipped canonical record map keyed by dataset ID and SHA-256. Repeated content
-adds a run but reuses the existing snapshot. Record events explain field-level
-changes and are sampled to 1,000 events; aggregate counts remain complete.
+The coordinator holds a native cross-process lock during acquisition and commit.
+SQLite stores immutable compressed snapshots, parser inputs, source documents,
+complete events, run reports, incidents, outbox transitions and approval decisions.
+SHA-256 and SQLite integrity checks detect accidental corruption, not malicious
+administrators capable of recomputing hashes. SQLite backup produces portable state.
 
-CKAN pages use `_id asc` ordering, exact non-estimated totals, identical column
-schemas, unique non-null internal row IDs and first-page consistency recheck.
-The user-facing `ID` is separately validated as the stable primary key. `_id` is
-excluded from semantic fingerprints. Null fields become blank strings and configured
-whitespace trimming is conservative; coordinate formats are not rewritten.
+Network and local-file heads are separate. Source/identity/normalization changes
+start a new comparison baseline, visibly; changing a quality threshold does not.
+Schema removal and critical findings hold a valid candidate for review. Acquisition
+and structural failures have no record diff and cannot advance trust. Candidate
+events are retained but explicitly labelled unaccepted in the interface.
 
-Reports distinguish local files from network inputs and record input byte hashes,
-canonical hashes, columns, page counts and the known scope of consistency checks.
-A baseline contains no inferred additions. A change is not inherently a defect.
+Numeric equivalence is opt-in. Original values and representation changes remain
+in snapshots even when no semantic event results. Rolling expiry uses an explicit
+time column and horizon; unexpected current-window removals remain suspicious.
+Freshness uses actual observation timestamps, qualified by validity flags, or
+published metadata. Unknown timezone or missing metadata never becomes invented UTC.
 
-The dashboard opens databases using SQLite `mode=ro`, labels local-file inputs,
-and handles missing/unreadable history. Bundled real data and fictional fixtures
-live in separate directories and verification databases.
+Incident identities exclude counts and sample values. Repeated findings increment
+occurrences; opening, reopening, severity escalation and recovery create outbox
+events. Failed acquisition cannot establish recovery of unexecuted quality checks.
+Recovery after editing a contract is a rule outcome, not proof of a source repair.
 
-| Gate | Observed state |
-| --- | --- |
-| Core, reordering, failure preservation, idempotence | 35 local tests pass including dashboard tests |
-| Live source | 2,314 records, 5 data pages per run; two runs match official CSV |
-| Streamlit | AppTest with real history; health/frontend HTTP 200 |
-| Workflows | actionlint passes; synthetic local Git persistence simulation passes |
-| GitHub-hosted scheduling, credentials, branch policy, artifact upload | Pending publication and first remote run |
-| Multi-day real changes and false-positive calibration | Not observed |
-
-Known weaknesses: no CKAN transaction across pages, later-page-only edits can escape
-first-page recheck; warning-level mass removals are accepted; stable IDs may be
-reassigned by the publisher; automatic year rollover is not implemented; SQLite
-assumes one writer; git persistence can be rejected by branch protection or another
-push, and binary history grows. Artifact retention reduces loss but is not an
-external durable-storage design.
+Reports sample 100 events for convenience; SQLite and exports retain every event.
+Replay re-parses stored input using the captured contract and original observation
+time, then checks canonical content and declarative rule outcomes. It does not
+reproduce historical HTTP availability or replace dependency/code version control.

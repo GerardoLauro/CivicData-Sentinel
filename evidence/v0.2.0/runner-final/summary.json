@@ -1,0 +1,31 @@
+{
+  "kind": "synthetic_local_state_branch_integration",
+  "observed": [
+    {
+      "synthetic_input": "fountains_base.csv",
+      "status": "success",
+      "restored": false,
+      "runs": 1,
+      "persisted": true
+    },
+    {
+      "synthetic_input": "fountains_changed.csv",
+      "status": "success",
+      "restored": true,
+      "runs": 2,
+      "persisted": true
+    },
+    {
+      "synthetic_input": "fountains_invalid.csv",
+      "status": "failed",
+      "restored": true,
+      "runs": 3,
+      "persisted": true
+    }
+  ],
+  "source_branch_unchanged": true,
+  "concurrent_update_rejected": true,
+  "github_hosted": false,
+  "artifact_upload_tested": false,
+  "temporary_clones_removed": true
+}

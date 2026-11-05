@@ -22,3 +22,21 @@ uses only these synthetic fixtures; it is not evidence of live municipal changes
 
 `sha256.json` covers all files in the live acquisition directory except itself.
 `checks/` contains local verification results, not GitHub-hosted workflow runs.
+
+## v0.2.0 sources
+
+`v0.2.0/live/` includes official records and derived audit snapshots for
+Ayuntamiento de Madrid — Fuentes de agua para beber, Calidad del aire. Datos en
+tiempo real, and Aparcamientos públicos municipales. All three catalog metadata
+responses state CC BY 4.0. Reference URLs and hashes are in the live summary.
+
+https://datos.madrid.es/dataset/300051-0-fuentes
+https://datos.madrid.es/dataset/212531-0-calidad-aire-tiempo-real
+https://datos.madrid.es/dataset/202625-0-aparcamientos-publicos
+
+Air rows are unpivoted into hour-ending observations using the configured Madrid
+timezone. N flags remain unavailable observations, not valid zero measurements.
+Parking CSV uses CP1252. CKAN result artifacts preserve decoded result objects;
+JSON-response and parser-input artifacts preserve their captured input bytes.
+Whitespace trimming and configured numeric equivalence apply to comparisons;
+source values are retained. No publisher endorsement is implied.

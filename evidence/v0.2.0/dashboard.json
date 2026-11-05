@@ -1,0 +1,10 @@
+{
+  "kind": "dashboard_verification",
+  "apptest_monitored_streams": 3,
+  "apptest_exceptions": 0,
+  "database_unchanged": true,
+  "server_health_http": 200,
+  "frontend_http": 200,
+  "browser_visual_review": false,
+  "server_stopped_after_check": true
+}

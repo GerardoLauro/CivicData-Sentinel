@@ -1,0 +1,670 @@
+{
+  "$defs": {
+    "Bounds": {
+      "additionalProperties": false,
+      "properties": {
+        "min": {
+          "title": "Min",
+          "type": "number"
+        },
+        "max": {
+          "title": "Max",
+          "type": "number"
+        },
+        "allow_blank": {
+          "default": false,
+          "title": "Allow Blank",
+          "type": "boolean"
+        },
+        "report_blank": {
+          "default": false,
+          "title": "Report Blank",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "min",
+        "max"
+      ],
+      "title": "Bounds",
+      "type": "object"
+    },
+    "Check": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-zA-Z0-9_.-]+$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "completeness",
+            "unique",
+            "domain",
+            "numeric",
+            "regex",
+            "freshness",
+            "numeric_change",
+            "distribution"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Column"
+        },
+        "columns": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Columns",
+          "type": "array"
+        },
+        "severity": {
+          "default": "warning",
+          "enum": [
+            "info",
+            "warning",
+            "error",
+            "critical"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "when": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Condition"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "min": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min"
+        },
+        "max": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max"
+        },
+        "values": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Values",
+          "type": "array"
+        },
+        "pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pattern"
+        },
+        "max_missing_fraction": {
+          "default": 0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Max Missing Fraction",
+          "type": "number"
+        },
+        "max_age_hours": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Age Hours"
+        },
+        "max_future_hours": {
+          "default": 1,
+          "minimum": 0,
+          "title": "Max Future Hours",
+          "type": "number"
+        },
+        "timezone": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timezone"
+        },
+        "max_absolute_change": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Absolute Change"
+        },
+        "max_relative_change": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Relative Change"
+        },
+        "min_samples": {
+          "default": 10,
+          "minimum": 2,
+          "title": "Min Samples",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "kind"
+      ],
+      "title": "Check",
+      "type": "object"
+    },
+    "Comparison": {
+      "additionalProperties": false,
+      "properties": {
+        "numeric_columns": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Numeric Columns",
+          "type": "array"
+        },
+        "tolerances": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Tolerance"
+          },
+          "title": "Tolerances",
+          "type": "object"
+        },
+        "ignore_columns": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Ignore Columns",
+          "type": "array"
+        },
+        "rolling_column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rolling Column"
+        },
+        "rolling_horizon_hours": {
+          "default": 24,
+          "exclusiveMinimum": 0,
+          "title": "Rolling Horizon Hours",
+          "type": "number"
+        }
+      },
+      "title": "Comparison",
+      "type": "object"
+    },
+    "Condition": {
+      "additionalProperties": false,
+      "properties": {
+        "column": {
+          "title": "Column",
+          "type": "string"
+        },
+        "equals": {
+          "title": "Equals",
+          "type": "string"
+        }
+      },
+      "required": [
+        "column",
+        "equals"
+      ],
+      "title": "Condition",
+      "type": "object"
+    },
+    "Policy": {
+      "additionalProperties": false,
+      "properties": {
+        "quarantine_removed_fraction": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 0.5,
+          "title": "Quarantine Removed Fraction"
+        },
+        "quarantine_severities": {
+          "items": {
+            "enum": [
+              "info",
+              "warning",
+              "error",
+              "critical"
+            ],
+            "type": "string"
+          },
+          "title": "Quarantine Severities",
+          "type": "array"
+        },
+        "schema_removed_severity": {
+          "default": "error",
+          "enum": [
+            "info",
+            "warning",
+            "error",
+            "critical"
+          ],
+          "title": "Schema Removed Severity",
+          "type": "string"
+        },
+        "schema_type_severity": {
+          "default": "warning",
+          "enum": [
+            "info",
+            "warning",
+            "error",
+            "critical"
+          ],
+          "title": "Schema Type Severity",
+          "type": "string"
+        }
+      },
+      "title": "Policy",
+      "type": "object"
+    },
+    "Source": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "default": "url",
+          "enum": [
+            "url",
+            "ckan_resource",
+            "ckan_datastore",
+            "json"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "api_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Api Url"
+        },
+        "resource_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resource Id"
+        },
+        "fallback_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fallback Url"
+        },
+        "records_path": {
+          "default": "records",
+          "title": "Records Path",
+          "type": "string"
+        },
+        "total_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Total Path"
+        },
+        "page_param": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page Param"
+        },
+        "max_pages": {
+          "default": 100,
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Max Pages",
+          "type": "integer"
+        }
+      },
+      "title": "Source",
+      "type": "object"
+    },
+    "Tolerance": {
+      "additionalProperties": false,
+      "properties": {
+        "absolute": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Absolute",
+          "type": "number"
+        },
+        "relative": {
+          "default": 0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Relative",
+          "type": "number"
+        }
+      },
+      "title": "Tolerance",
+      "type": "object"
+    },
+    "Unpivot": {
+      "additionalProperties": false,
+      "properties": {
+        "id_columns": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Id Columns",
+          "type": "array"
+        },
+        "value_pattern": {
+          "default": "H??",
+          "title": "Value Pattern",
+          "type": "string"
+        },
+        "flag_prefix": {
+          "default": "V",
+          "title": "Flag Prefix",
+          "type": "string"
+        },
+        "expected_slots": {
+          "default": 24,
+          "maximum": 24,
+          "minimum": 1,
+          "title": "Expected Slots",
+          "type": "integer"
+        },
+        "date_columns": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 3,
+          "minItems": 3,
+          "title": "Date Columns",
+          "type": "array"
+        },
+        "timezone": {
+          "title": "Timezone",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id_columns",
+        "date_columns",
+        "timezone"
+      ],
+      "title": "Unpivot",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "config_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Config Version",
+      "type": "integer"
+    },
+    "dataset_id": {
+      "pattern": "^[a-zA-Z0-9_-]+$",
+      "title": "Dataset Id",
+      "type": "string"
+    },
+    "title": {
+      "default": "",
+      "title": "Title",
+      "type": "string"
+    },
+    "description": {
+      "default": "",
+      "title": "Description",
+      "type": "string"
+    },
+    "catalog_url": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Catalog Url"
+    },
+    "license": {
+      "default": "",
+      "title": "License",
+      "type": "string"
+    },
+    "primary_key": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      ],
+      "title": "Primary Key"
+    },
+    "source": {
+      "$ref": "#/$defs/Source"
+    },
+    "encoding": {
+      "default": "utf-8-sig",
+      "title": "Encoding",
+      "type": "string"
+    },
+    "delimiter": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Delimiter"
+    },
+    "required_columns": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Required Columns",
+      "type": "array"
+    },
+    "allowed_values": {
+      "additionalProperties": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "title": "Allowed Values",
+      "type": "object"
+    },
+    "numeric_ranges": {
+      "additionalProperties": {
+        "$ref": "#/$defs/Bounds"
+      },
+      "title": "Numeric Ranges",
+      "type": "object"
+    },
+    "trim_whitespace": {
+      "default": false,
+      "title": "Trim Whitespace",
+      "type": "boolean"
+    },
+    "removal_alert_fraction": {
+      "default": 0.2,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Removal Alert Fraction",
+      "type": "number"
+    },
+    "freshness_max_hours": {
+      "anyOf": [
+        {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Freshness Max Hours"
+    },
+    "checks": {
+      "items": {
+        "$ref": "#/$defs/Check"
+      },
+      "title": "Checks",
+      "type": "array"
+    },
+    "comparison": {
+      "$ref": "#/$defs/Comparison"
+    },
+    "policy": {
+      "$ref": "#/$defs/Policy"
+    },
+    "unpivot": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Unpivot"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "max_interval_hours": {
+      "default": 48,
+      "exclusiveMinimum": 0,
+      "title": "Max Interval Hours",
+      "type": "number"
+    }
+  },
+  "required": [
+    "dataset_id",
+    "primary_key",
+    "source"
+  ],
+  "title": "Dataset",
+  "type": "object"
+}

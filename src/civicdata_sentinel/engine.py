@@ -1,10 +1,12 @@
 """Deterministic validation, canonicalization, and explainable record diffs."""
+
 from __future__ import annotations
-from collections import Counter
-from datetime import datetime, timezone
+
 import hashlib
 import json
 import math
+from collections import Counter
+from datetime import datetime, timezone
 
 
 def _issue(code: str, severity: str, message: str, **details: object) -> dict:
@@ -27,27 +29,45 @@ def canonicalize(rows: list[dict], fields: list[str], cfg: dict) -> tuple[dict[s
     # whitespace only when explicitly configured (default: false).
     trim = cfg.get("trim_whitespace", False)
     normalized = [
-        {k: ((v.strip() if trim else v) if isinstance(v, str) else v) for k, v in row.items()}
-        for row in rows
+        {k: ((v.strip() if trim else v) if isinstance(v, str) else v) for k, v in row.items()} for row in rows
     ]
     counts = Counter(r.get(primary, "") for r in normalized)
-    blank = counts.get("", 0)
+    blank = sum(count for key, count in counts.items() if key is None or not str(key).strip())
     duplicated = sorted(k for k, count in counts.items() if count > 1 and k != "")
     if blank:
         issues.append(_issue("missing_primary_keys", "error", "Blank primary keys", count=blank))
     if duplicated:
-        issues.append(_issue("duplicate_primary_keys", "error", "Duplicate primary keys", count=len(duplicated), examples=duplicated[:10]))
+        issues.append(
+            _issue(
+                "duplicate_primary_keys",
+                "error",
+                "Duplicate primary keys",
+                count=len(duplicated),
+                examples=duplicated[:10],
+            )
+        )
     if blank or duplicated:
         return {}, issues, False
 
     allowed = cfg.get("allowed_values", {})
     for column, values in allowed.items():
         if column not in fields:
-            issues.append(_issue("unavailable_rule_column", "warning", "Column for allowed-values rule missing", column=column))
+            issues.append(
+                _issue("unavailable_rule_column", "warning", "Column for allowed-values rule missing", column=column)
+            )
             continue
         bad = [(r[primary], r.get(column)) for r in normalized if r.get(column) not in values]
         if bad:
-            issues.append(_issue("invalid_values", "warning", "Values outside allowed set", column=column, count=len(bad), examples=bad[:5]))
+            issues.append(
+                _issue(
+                    "invalid_values",
+                    "warning",
+                    "Values outside allowed set",
+                    column=column,
+                    count=len(bad),
+                    examples=bad[:5],
+                )
+            )
 
     for column, bounds in cfg.get("numeric_ranges", {}).items():
         if column not in fields:
@@ -67,9 +87,27 @@ def canonicalize(rows: list[dict], fields: list[str], cfg: dict) -> tuple[dict[s
             except (ValueError, TypeError, KeyError):
                 bad.append((row[primary], value))
         if bad:
-            issues.append(_issue("invalid_numeric_range", "warning", "Invalid numeric values", column=column, count=len(bad), examples=bad[:5]))
+            issues.append(
+                _issue(
+                    "invalid_numeric_range",
+                    "warning",
+                    "Invalid numeric values",
+                    column=column,
+                    count=len(bad),
+                    examples=bad[:5],
+                )
+            )
         if missing and bounds.get("report_blank", False):
-            issues.append(_issue("missing_numeric_values", "warning", "Numeric values not published; records remain usable", column=column, count=len(missing), examples=missing[:5]))
+            issues.append(
+                _issue(
+                    "missing_numeric_values",
+                    "warning",
+                    "Numeric values not published; records remain usable",
+                    column=column,
+                    count=len(missing),
+                    examples=missing[:5],
+                )
+            )
 
     records = {str(row[primary]): row for row in normalized}
     return records, issues, True
@@ -80,9 +118,19 @@ def fingerprint(records: dict[str, dict]) -> str:
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
-def diff(previous: dict[str, dict] | None, current: dict[str, dict], *, removal_alert_fraction: float = 0.20) -> tuple[dict, list[dict], list[dict]]:
+def diff(
+    previous: dict[str, dict] | None, current: dict[str, dict], *, removal_alert_fraction: float = 0.20
+) -> tuple[dict, list[dict], list[dict]]:
     """Return complete stats and bounded event samples (not full rows)."""
-    stats = {"baseline": previous is None, "added": 0, "removed": 0, "modified": 0, "unchanged": 0, "current_rows": len(current), "previous_rows": len(previous) if previous is not None else None}
+    stats = {
+        "baseline": previous is None,
+        "added": 0,
+        "removed": 0,
+        "modified": 0,
+        "unchanged": 0,
+        "current_rows": len(current),
+        "previous_rows": len(previous) if previous is not None else None,
+    }
     if previous is None:
         return stats, [], []
     added = sorted(current.keys() - previous.keys())
@@ -99,7 +147,11 @@ def diff(previous: dict[str, dict] | None, current: dict[str, dict], *, removal_
             events.append({"type": "removed", "id": key})
     for key in shared:
         old, new = previous[key], current[key]
-        changes = {col: {"before": old.get(col), "after": new.get(col)} for col in sorted(old.keys() | new.keys()) if old.get(col) != new.get(col)}
+        changes = {
+            col: {"before": old.get(col), "after": new.get(col)}
+            for col in sorted(old.keys() | new.keys())
+            if old.get(col) != new.get(col)
+        }
         # Missing vs blank should not be equated: old.get(col) == new.get(col) can
         # both equal None only when absent from both, which is fine for same shared id.
         if changes:
@@ -110,7 +162,15 @@ def diff(previous: dict[str, dict] | None, current: dict[str, dict], *, removal_
             stats["unchanged"] += 1
     issues = []
     if previous and stats["removed"] / len(previous) >= removal_alert_fraction and stats["removed"]:
-        issues.append(_issue("mass_removal", "warning", "Large fraction of previous records disappeared", removed=stats["removed"], previous_rows=len(previous)))
+        issues.append(
+            _issue(
+                "mass_removal",
+                "warning",
+                "Large fraction of previous records disappeared",
+                removed=stats["removed"],
+                previous_rows=len(previous),
+            )
+        )
     return stats, events, issues
 
 
@@ -126,7 +186,15 @@ def check_freshness(meta: dict, cfg: dict, *, now: datetime | None = None) -> li
         now = now or datetime.now(timezone.utc)
         age_h = (now - dt).total_seconds() / 3600
         if age_h > float(maximum):
-            return [_issue("stale_source_metadata", "warning", "Source metadata modification date exceeds configured threshold", age_hours=round(age_h, 1), max_hours=maximum)]
+            return [
+                _issue(
+                    "stale_source_metadata",
+                    "warning",
+                    "Source metadata modification date exceeds configured threshold",
+                    age_hours=round(age_h, 1),
+                    max_hours=maximum,
+                )
+            ]
     except (ValueError, TypeError, AttributeError):
         return [_issue("invalid_metadata_date", "info", "Unable to parse source modification timestamp")]
     return []

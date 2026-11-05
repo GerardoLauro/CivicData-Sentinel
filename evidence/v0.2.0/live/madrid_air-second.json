@@ -1,0 +1,516 @@
+{
+  "schema_version": "2.0",
+  "engine_version": "0.2.0",
+  "dataset_id": "madrid_air",
+  "title": "Madrid · Hourly air measurements",
+  "checked_at": "2026-11-05T15:01:05.873216+00:00",
+  "status": "success",
+  "accepted": true,
+  "source": {
+    "source_url": "https://ciudadesabiertas.madrid.es/dynamicAPI/API/query/calair_tiemporeal.json?pageSize=4500",
+    "source_format": "json",
+    "total_rows": 126,
+    "data_pages": 1,
+    "source_last_modified": null,
+    "metadata_status": "not_published",
+    "consistency": "exact_count; not_transactional",
+    "input_kind": "network",
+    "payload_sha256": "65c63f727bda67d30d74f68cb429e1935f1ef6afd0f7fe35c306f71a734b147b",
+    "payload_bytes": 18752,
+    "parser_encoding": "utf-8"
+  },
+  "digest": "64d8bd0aa0866738fdc61a57ab48e231cd8e639aa3f3db0127eb588eb11d4c3b",
+  "previous_digest": "64d8bd0aa0866738fdc61a57ab48e231cd8e639aa3f3db0127eb588eb11d4c3b",
+  "stats": {
+    "baseline": false,
+    "added": 0,
+    "removed": 0,
+    "modified": 0,
+    "unchanged": 3024,
+    "current_rows": 3024,
+    "previous_rows": 3024,
+    "window_expired": 0,
+    "unexpected_removed": 0,
+    "suppressed_fields": 0
+  },
+  "events": [],
+  "events_truncated": false,
+  "issues": [],
+  "checks": [
+    {
+      "id": "structure",
+      "kind": "required_columns_and_primary_key",
+      "outcome": "pass",
+      "severity": "error",
+      "evaluated": 126
+    },
+    {
+      "id": "validity-vocabulary",
+      "kind": "domain",
+      "severity": "warning",
+      "column": "validity",
+      "evaluated": 3024,
+      "failed": 0,
+      "outcome": "pass",
+      "examples": [],
+      "parameters": {
+        "id": "validity-vocabulary",
+        "kind": "domain",
+        "column": "validity",
+        "columns": [],
+        "severity": "warning",
+        "when": null,
+        "min": null,
+        "max": null,
+        "values": [
+          "V",
+          "N"
+        ],
+        "pattern": null,
+        "max_missing_fraction": 0,
+        "max_age_hours": null,
+        "max_future_hours": 1,
+        "timezone": null,
+        "max_absolute_change": null,
+        "max_relative_change": null,
+        "min_samples": 10
+      }
+    },
+    {
+      "id": "numeric-observations",
+      "kind": "numeric",
+      "severity": "warning",
+      "column": "value",
+      "evaluated": 1832,
+      "failed": 0,
+      "outcome": "pass",
+      "examples": [],
+      "parameters": {
+        "id": "numeric-observations",
+        "kind": "numeric",
+        "column": "value",
+        "columns": [],
+        "severity": "warning",
+        "when": {
+          "column": "validity",
+          "equals": "V"
+        },
+        "min": -10.0,
+        "max": 100000.0,
+        "values": [],
+        "pattern": null,
+        "max_missing_fraction": 0,
+        "max_age_hours": null,
+        "max_future_hours": 1,
+        "timezone": null,
+        "max_absolute_change": null,
+        "max_relative_change": null,
+        "min_samples": 10
+      }
+    },
+    {
+      "id": "observation-freshness",
+      "kind": "freshness",
+      "severity": "error",
+      "column": "observed_at",
+      "evaluated": 1832,
+      "failed": 0,
+      "outcome": "pass",
+      "examples": [],
+      "parameters": {
+        "id": "observation-freshness",
+        "kind": "freshness",
+        "column": "observed_at",
+        "columns": [],
+        "severity": "error",
+        "when": {
+          "column": "validity",
+          "equals": "V"
+        },
+        "min": null,
+        "max": null,
+        "values": [],
+        "pattern": null,
+        "max_missing_fraction": 0,
+        "max_age_hours": 4.0,
+        "max_future_hours": 2.0,
+        "timezone": null,
+        "max_absolute_change": null,
+        "max_relative_change": null,
+        "min_samples": 10
+      },
+      "latest_age_hours": 1.018
+    },
+    {
+      "id": "sample-key",
+      "kind": "regex",
+      "severity": "error",
+      "column": "PUNTO_MUESTREO",
+      "evaluated": 3024,
+      "failed": 0,
+      "outcome": "pass",
+      "examples": [],
+      "parameters": {
+        "id": "sample-key",
+        "kind": "regex",
+        "column": "PUNTO_MUESTREO",
+        "columns": [],
+        "severity": "error",
+        "when": null,
+        "min": null,
+        "max": null,
+        "values": [],
+        "pattern": "^[0-9]{8}_[0-9]+_[A-Za-z0-9]+$",
+        "max_missing_fraction": 0,
+        "max_age_hours": null,
+        "max_future_hours": 1,
+        "timezone": null,
+        "max_absolute_change": null,
+        "max_relative_change": null,
+        "min_samples": 10
+      }
+    },
+    {
+      "id": "source_metadata_freshness",
+      "kind": "freshness",
+      "outcome": "unknown",
+      "severity": "warning",
+      "reason": "No timestamp is inferred from unchanged contents"
+    }
+  ],
+  "profile": {
+    "PROVINCIA": {
+      "type": "number",
+      "missing": 0,
+      "missing_fraction": 0.0,
+      "distinct": 1,
+      "min": 28.0,
+      "max": 28.0,
+      "median": 28.0
+    },
+    "MUNICIPIO": {
+      "type": "number",
+      "missing": 0,
+      "missing_fraction": 0.0,
+      "distinct": 1,
+      "min": 79.0,
+      "max": 79.0,
+      "median": 79.0
+    },
+    "ESTACION": {
+      "type": "number",
+      "missing": 0,
+      "missing_fraction": 0.0,
+      "distinct": 23,
+      "min": 4.0,
+      "max": 60.0,
+      "median": 38.0
+    },
+    "MAGNITUD": {
+      "type": "number",
+      "missing": 0,
+      "missing_fraction": 0.0,
+      "distinct": 11,
+      "min": 1.0,
+      "max": 35.0,
+      "median": 9.0
+    },
+    "PUNTO_MUESTREO": {
+      "type": "string",
+      "missing": 0,
+      "missing_fraction": 0.0,
+      "distinct": 126
+    },
+    "slot": {
+      "type": "string",
+      "missing": 0,
+      "missing_fraction": 0.0,
+      "distinct": 24
+    },
+    "observed_at": {
+      "type": "string",
+      "missing": 0,
+      "missing_fraction": 0.0,
+      "distinct": 24
+    },
+    "value": {
+      "type": "number",
+      "missing": 0,
+      "missing_fraction": 0.0,
+      "distinct": 150,
+      "min": 0.0,
+      "max": 228.0,
+      "median": 2.0
+    },
+    "validity": {
+      "type": "string",
+      "missing": 0,
+      "missing_fraction": 0.0,
+      "distinct": 2
+    }
+  },
+  "columns": [
+    "PROVINCIA",
+    "MUNICIPIO",
+    "ESTACION",
+    "MAGNITUD",
+    "PUNTO_MUESTREO",
+    "slot",
+    "observed_at",
+    "value",
+    "validity"
+  ],
+  "source_columns": [
+    "PROVINCIA",
+    "MUNICIPIO",
+    "ESTACION",
+    "MAGNITUD",
+    "PUNTO_MUESTREO",
+    "ANO",
+    "MES",
+    "DIA",
+    "H01",
+    "V01",
+    "H02",
+    "V02",
+    "H03",
+    "V03",
+    "H04",
+    "V04",
+    "H05",
+    "V05",
+    "H06",
+    "V06",
+    "H07",
+    "V07",
+    "H08",
+    "V08",
+    "H09",
+    "V09",
+    "H10",
+    "V10",
+    "H11",
+    "V11",
+    "H12",
+    "V12",
+    "H13",
+    "V13",
+    "H14",
+    "V14",
+    "H15",
+    "V15",
+    "H16",
+    "V16",
+    "H17",
+    "V17",
+    "H18",
+    "V18",
+    "H19",
+    "V19",
+    "H20",
+    "V20",
+    "H21",
+    "V21",
+    "H22",
+    "V22",
+    "H23",
+    "V23",
+    "H24",
+    "V24"
+  ],
+  "schema": {
+    "baseline": false,
+    "added": [],
+    "removed": [],
+    "type_changes": []
+  },
+  "config": {
+    "config_version": 1,
+    "dataset_id": "madrid_air",
+    "title": "Madrid · Hourly air measurements",
+    "description": "Provisional hourly observations; invalid/future slots are retained but excluded from numeric and freshness checks.",
+    "catalog_url": "https://datos.madrid.es/dataset/212531-0-calidad-aire-tiempo-real",
+    "license": "CC BY 4.0 · Ayuntamiento de Madrid",
+    "primary_key": [
+      "PUNTO_MUESTREO",
+      "observed_at"
+    ],
+    "source": {
+      "type": "json",
+      "url": "https://ciudadesabiertas.madrid.es/dynamicAPI/API/query/calair_tiemporeal.json?pageSize=4500",
+      "api_url": null,
+      "resource_id": null,
+      "fallback_url": null,
+      "records_path": "records",
+      "total_path": "totalRecords",
+      "page_param": "page",
+      "max_pages": 100
+    },
+    "encoding": "utf-8-sig",
+    "delimiter": null,
+    "required_columns": [
+      "PUNTO_MUESTREO",
+      "observed_at",
+      "value",
+      "validity"
+    ],
+    "allowed_values": {},
+    "numeric_ranges": {},
+    "trim_whitespace": true,
+    "removal_alert_fraction": 0.2,
+    "freshness_max_hours": null,
+    "checks": [
+      {
+        "id": "validity-vocabulary",
+        "kind": "domain",
+        "column": "validity",
+        "columns": [],
+        "severity": "warning",
+        "when": null,
+        "min": null,
+        "max": null,
+        "values": [
+          "V",
+          "N"
+        ],
+        "pattern": null,
+        "max_missing_fraction": 0,
+        "max_age_hours": null,
+        "max_future_hours": 1,
+        "timezone": null,
+        "max_absolute_change": null,
+        "max_relative_change": null,
+        "min_samples": 10
+      },
+      {
+        "id": "numeric-observations",
+        "kind": "numeric",
+        "column": "value",
+        "columns": [],
+        "severity": "warning",
+        "when": {
+          "column": "validity",
+          "equals": "V"
+        },
+        "min": -10.0,
+        "max": 100000.0,
+        "values": [],
+        "pattern": null,
+        "max_missing_fraction": 0,
+        "max_age_hours": null,
+        "max_future_hours": 1,
+        "timezone": null,
+        "max_absolute_change": null,
+        "max_relative_change": null,
+        "min_samples": 10
+      },
+      {
+        "id": "observation-freshness",
+        "kind": "freshness",
+        "column": "observed_at",
+        "columns": [],
+        "severity": "error",
+        "when": {
+          "column": "validity",
+          "equals": "V"
+        },
+        "min": null,
+        "max": null,
+        "values": [],
+        "pattern": null,
+        "max_missing_fraction": 0,
+        "max_age_hours": 4.0,
+        "max_future_hours": 2.0,
+        "timezone": null,
+        "max_absolute_change": null,
+        "max_relative_change": null,
+        "min_samples": 10
+      },
+      {
+        "id": "sample-key",
+        "kind": "regex",
+        "column": "PUNTO_MUESTREO",
+        "columns": [],
+        "severity": "error",
+        "when": null,
+        "min": null,
+        "max": null,
+        "values": [],
+        "pattern": "^[0-9]{8}_[0-9]+_[A-Za-z0-9]+$",
+        "max_missing_fraction": 0,
+        "max_age_hours": null,
+        "max_future_hours": 1,
+        "timezone": null,
+        "max_absolute_change": null,
+        "max_relative_change": null,
+        "min_samples": 10
+      }
+    ],
+    "comparison": {
+      "numeric_columns": [
+        "value"
+      ],
+      "tolerances": {},
+      "ignore_columns": [],
+      "rolling_column": "observed_at",
+      "rolling_horizon_hours": 24
+    },
+    "policy": {
+      "quarantine_removed_fraction": 0.5,
+      "quarantine_severities": [
+        "error",
+        "critical"
+      ],
+      "schema_removed_severity": "error",
+      "schema_type_severity": "warning"
+    },
+    "unpivot": {
+      "id_columns": [
+        "PROVINCIA",
+        "MUNICIPIO",
+        "ESTACION",
+        "MAGNITUD",
+        "PUNTO_MUESTREO"
+      ],
+      "value_pattern": "H??",
+      "flag_prefix": "V",
+      "expected_slots": 24,
+      "date_columns": [
+        "ANO",
+        "MES",
+        "DIA"
+      ],
+      "timezone": "Europe/Madrid"
+    },
+    "max_interval_hours": 4.0
+  },
+  "config_sha256": "7e15dc4219914176e869047642d1db246e04c4940ed62c3372bc39b22f2250e1",
+  "comparison_signature": "211c4f90552ed4b137a17e07159186836f3c9711bcbb1fffb195d798b75c1dca",
+  "source_schema": {
+    "baseline": false,
+    "added": [],
+    "removed": [],
+    "type_changes": []
+  },
+  "event_count": 0,
+  "unchanged_snapshot": true,
+  "semantic_unchanged": true,
+  "max_severity": "none",
+  "health": "healthy",
+  "duration_seconds": 1.203,
+  "artifacts": [
+    {
+      "kind": "json_response",
+      "sha256": "53023d59be3ad40173f4207cca2b54046025d00bfa634bacdf0dcca4d933d388",
+      "bytes": 129836
+    },
+    {
+      "kind": "parser_input",
+      "sha256": "65c63f727bda67d30d74f68cb429e1935f1ef6afd0f7fe35c306f71a734b147b",
+      "bytes": 18752
+    }
+  ],
+  "run_id": 2,
+  "new_incidents": [],
+  "resolved_incidents": []
+}

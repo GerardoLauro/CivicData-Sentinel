@@ -1,0 +1,48 @@
+config_version: 1
+dataset_id: madrid_parking
+title: Madrid · Municipal parking inventory
+description: Municipal public parking facilities; this is an inventory, not live occupancy.
+catalog_url: https://datos.madrid.es/dataset/202625-0-aparcamientos-publicos
+license: CC BY 4.0 · Ayuntamiento de Madrid
+source:
+  type: ckan_resource
+  api_url: https://datos.madrid.es/api/3/action
+  resource_id: 202625-3-aparcamientos-publicos-csv
+primary_key: PK
+required_columns: [PK, NOMBRE, LATITUD, LONGITUD, ACCESIBILIDAD]
+trim_whitespace: true
+comparison:
+  numeric_columns: [LATITUD, LONGITUD]
+checks:
+  - id: facility-name
+    kind: completeness
+    column: NOMBRE
+    severity: error
+  - id: latitude
+    kind: numeric
+    column: LATITUD
+    min: 40
+    max: 41
+    severity: warning
+  - id: longitude
+    kind: numeric
+    column: LONGITUD
+    min: -4.5
+    max: -3
+    severity: warning
+  - id: accessibility-codes
+    kind: domain
+    column: ACCESIBILIDAD
+    values: ['0', '1', '2']
+    severity: warning
+  - id: postal-code
+    kind: regex
+    column: CODIGO-POSTAL
+    pattern: '^28[0-9]{3}$'
+    severity: warning
+max_interval_hours: 48
+policy:
+  quarantine_removed_fraction: 0.3
+
+# Official CSV is legacy Western European text, unlike the CKAN JSON view.
+encoding: cp1252

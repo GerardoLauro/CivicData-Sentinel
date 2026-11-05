@@ -17,3 +17,11 @@ __pycache__/
 .ruff_cache/
 .coverage
 /htmlcov/
+
+/backups/
+.sentinel-state-parent
+.sentinel-op-*/
+.hypothesis/
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite.lock
