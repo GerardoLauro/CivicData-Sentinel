@@ -483,6 +483,38 @@
           "title": "Expected Slots",
           "type": "integer"
         },
+        "hour_semantics": {
+          "const": "local_hour_ending",
+          "default": "local_hour_ending",
+          "title": "Hour Semantics",
+          "type": "string"
+        },
+        "nonexistent_time": {
+          "default": "reject",
+          "enum": [
+            "reject",
+            "omit_unavailable"
+          ],
+          "title": "Nonexistent Time",
+          "type": "string"
+        },
+        "ambiguous_time": {
+          "default": "reject",
+          "enum": [
+            "reject",
+            "earlier",
+            "later"
+          ],
+          "title": "Ambiguous Time",
+          "type": "string"
+        },
+        "unavailable_flags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Unavailable Flags",
+          "type": "array"
+        },
         "date_columns": {
           "items": {
             "type": "string"

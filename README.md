@@ -1,6 +1,6 @@
 # CivicData Sentinel
 
-**Evidence-first monitoring for public data. Version 0.2.0.**
+**Evidence-first monitoring for public data. Version 0.2.1.**
 
 Track meaningful record changes, validate dataset contracts and keep replayable
 evidence. Suspicious publications can be quarantined without replacing trusted
@@ -122,3 +122,12 @@ only Windows/Python 3.12.2 has been executed locally.
 Code: MIT. Madrid data: Ayuntamiento de Madrid, CC BY 4.0; see
 [data attribution](evidence/NOTICE.md). Independent of CivicWater. No AI is needed
 for these deterministic checks, and no scientific novelty is claimed for the algorithms.
+
+## v0.2.1 audit hardening
+
+The independent v0.2.0 audit led to DST-gap/fold contracts, controlled malformed
+DEFLATE diagnostics and semantic replay of every stored event, aggregate and
+normalized-schema change. See [audit response](docs/audit-response-v0.2.1.md).
+Storage integrity is explicitly labelled storage-only; it is not semantic replay.
+Replay reports each verified level and exclusions; it is not full provenance or
+incident-lifecycle attestation. Historical v0.2.0 verification remains archived.

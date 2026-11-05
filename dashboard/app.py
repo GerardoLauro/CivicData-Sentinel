@@ -206,7 +206,7 @@ with inspector:
             "Inspect check",
             ids,
             format_func=lambda i: (
-                f"#{i} Â· {names[by_id[i]['dataset_id']]} Â· {by_id[i]['status']} Â· {by_id[i]['checked_at']}"
+                f"#{i} Â| {names[by_id[i]['dataset_id']]} Â| {by_id[i]['status']} Â| {by_id[i]['checked_at']}"
             ),
         )
         report = by_id[chosen]
@@ -254,7 +254,7 @@ with inspector:
         shown = [e for e in events if (event_type == "All changes" or e["type"] == event_type) and query in e["id"]]
         pages = max(1, (len(shown) + 99) // 100)
         page = st.number_input("Event page", min_value=1, max_value=pages, value=1, step=1)
-        st.caption(f"{len(shown):,} matching events Â· page {page} of {pages} Â· downloads include every event")
+        st.caption(f"{len(shown):,} matching events Â| page {page} of {pages} Â| downloads include every event")
         st.dataframe(
             [
                 {

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.1 — 2026-11-05
+
+- Reject nonexistent and ambiguous local hours by default; explicit omission of unavailable gap slots or fold selection requires a contract.
+- Madrid air omits only unavailable spring-gap slots and rejects ambiguous autumn slots pending authoritative fold information.
+- Catch invalid gzip/DEFLATE failures in snapshot, artifact and replay diagnostics.
+- Replay all semantic events, aggregate counts and normalized schema; expose verification levels and exclusions.
+- Label storage integrity scope explicitly; hashes alone are not semantic attestation.
+- Use ASCII dashboard icon/separators for encoding portability.
+- Add eight audit regression cases; retain original evidence and history.
+
 ## 0.2.0 — 2026-11-05
 
 - Three independent Madrid contracts: fountains, hourly air, parking inventory.

@@ -11,6 +11,7 @@ import hashlib
 import json
 import os
 import sqlite3
+import zlib
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -98,7 +99,7 @@ def read_snapshot(con, dataset_id, digest):
         raise IntegrityError("Referenced snapshot is absent")
     try:
         records = json.loads(gzip.decompress(found[0]))
-    except (OSError, ValueError, EOFError) as exc:
+    except (OSError, ValueError, EOFError, zlib.error) as exc:
         raise IntegrityError("Snapshot is corrupt") from exc
     if fingerprint(records) != digest:
         raise IntegrityError("Snapshot content hash mismatch")
@@ -355,7 +356,7 @@ def integrity(con):
             content = gzip.decompress(compressed)
             if sha(content) != digest or len(content) != length:
                 problems.append("Artifact hash/length mismatch: " + digest)
-        except (OSError, EOFError):
+        except (OSError, EOFError, zlib.error):
             problems.append("Corrupt artifact: " + digest)
     for rid, text, digest in con.execute("SELECT id,report_json,report_sha256 FROM runs"):
         if sha(text.encode()) != digest:
@@ -383,6 +384,7 @@ def integrity(con):
         ):
             problems.append("Trusted head differs from referenced run")
     return {
+        "verification_level": "storage_integrity_only",
         "ok": not problems,
         "problems": problems,
         "snapshots": con.execute("SELECT COUNT(*) FROM snapshots").fetchone()[0],

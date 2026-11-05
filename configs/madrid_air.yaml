@@ -17,6 +17,10 @@ unpivot:
   value_pattern: H??
   flag_prefix: V
   timezone: Europe/Madrid
+  hour_semantics: local_hour_ending
+  nonexistent_time: omit_unavailable
+  ambiguous_time: reject
+  unavailable_flags: [N]
 required_columns: [PUNTO_MUESTREO, observed_at, value, validity]
 trim_whitespace: true
 comparison:

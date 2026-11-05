@@ -1,0 +1,287 @@
+{
+  "kind": "observed_live_catalog_verification",
+  "started_at": "2026-11-05T16:12:23.315865+00:00",
+  "finished_at": "2026-11-05T16:12:38.574357+00:00",
+  "dataset_count": 3,
+  "observations": [
+    {
+      "dataset_id": "madrid_air",
+      "source_rows": 126,
+      "normalized_rows": 3024,
+      "columns": 9,
+      "reference_url": "https://ciudadesabiertas.madrid.es/dynamicAPI/API/query/calair_tiemporeal.csv?pageSize=4500",
+      "reference_file": "madrid_air-reference.bin",
+      "reference_sha256": "6029f4f43e8f669c413064d7aa51a8655d3a6f2a1249f1e98809a874c8fe709d",
+      "canonical_sha256": "30a097c1d038e43b885bc8ead1c0e2e3adca42c2b0ed8ed1d556858d2ae7f8e2",
+      "independent_format_matches_all_records": true,
+      "first_run": 1,
+      "second_run": 2,
+      "second_stats": {
+        "baseline": false,
+        "added": 0,
+        "removed": 0,
+        "modified": 0,
+        "unchanged": 3024,
+        "current_rows": 3024,
+        "previous_rows": 3024,
+        "window_expired": 0,
+        "unexpected_removed": 0,
+        "suppressed_fields": 0
+      },
+      "replays": [
+        {
+          "run_id": 1,
+          "reproduced": true,
+          "verification_levels": {
+            "snapshot": true,
+            "configured_quality_checks": true,
+            "complete_semantic_events": true,
+            "semantic_statistics": true,
+            "normalized_schema": true
+          },
+          "not_verified": [
+            "source provenance",
+            "raw source schema",
+            "all report findings",
+            "incident transitions",
+            "operator decisions",
+            "historical HTTP availability"
+          ],
+          "canonical_sha256": "30a097c1d038e43b885bc8ead1c0e2e3adca42c2b0ed8ed1d556858d2ae7f8e2",
+          "checks_replayed": 4,
+          "network_used": false
+        },
+        {
+          "run_id": 2,
+          "reproduced": true,
+          "verification_levels": {
+            "snapshot": true,
+            "configured_quality_checks": true,
+            "complete_semantic_events": true,
+            "semantic_statistics": true,
+            "normalized_schema": true
+          },
+          "not_verified": [
+            "source provenance",
+            "raw source schema",
+            "all report findings",
+            "incident transitions",
+            "operator decisions",
+            "historical HTTP availability"
+          ],
+          "canonical_sha256": "30a097c1d038e43b885bc8ead1c0e2e3adca42c2b0ed8ed1d556858d2ae7f8e2",
+          "checks_replayed": 4,
+          "network_used": false
+        }
+      ],
+      "observed_findings": [],
+      "data_pages": 1
+    },
+    {
+      "dataset_id": "madrid_fountains",
+      "source_rows": 2314,
+      "normalized_rows": 2314,
+      "columns": 24,
+      "reference_url": "https://datos.madrid.es/dataset/300051-0-fuentes/resource/300051-26-fuentes/download/300051-0-fuentes_27_20261105_065355.csv",
+      "reference_file": "madrid_fountains-reference.bin",
+      "reference_sha256": "1f45a5c0770a755c55546ed8975491787f7b08cec3047bff5551502d2e87da1f",
+      "canonical_sha256": "ea727904cb86311e4250f1c697ffe6f7b2abd315a08201ceb6f6bef36abd5751",
+      "independent_format_matches_all_records": true,
+      "first_run": 3,
+      "second_run": 4,
+      "second_stats": {
+        "baseline": false,
+        "added": 0,
+        "removed": 0,
+        "modified": 0,
+        "unchanged": 2314,
+        "current_rows": 2314,
+        "previous_rows": 2314,
+        "window_expired": 0,
+        "unexpected_removed": 0,
+        "suppressed_fields": 0
+      },
+      "replays": [
+        {
+          "run_id": 3,
+          "reproduced": true,
+          "verification_levels": {
+            "snapshot": true,
+            "configured_quality_checks": true,
+            "complete_semantic_events": true,
+            "semantic_statistics": true,
+            "normalized_schema": true
+          },
+          "not_verified": [
+            "source provenance",
+            "raw source schema",
+            "all report findings",
+            "incident transitions",
+            "operator decisions",
+            "historical HTTP availability"
+          ],
+          "canonical_sha256": "ea727904cb86311e4250f1c697ffe6f7b2abd315a08201ceb6f6bef36abd5751",
+          "checks_replayed": 1,
+          "network_used": false
+        },
+        {
+          "run_id": 4,
+          "reproduced": true,
+          "verification_levels": {
+            "snapshot": true,
+            "configured_quality_checks": true,
+            "complete_semantic_events": true,
+            "semantic_statistics": true,
+            "normalized_schema": true
+          },
+          "not_verified": [
+            "source provenance",
+            "raw source schema",
+            "all report findings",
+            "incident transitions",
+            "operator decisions",
+            "historical HTTP availability"
+          ],
+          "canonical_sha256": "ea727904cb86311e4250f1c697ffe6f7b2abd315a08201ceb6f6bef36abd5751",
+          "checks_replayed": 1,
+          "network_used": false
+        }
+      ],
+      "observed_findings": [
+        {
+          "code": "missing_numeric_values",
+          "severity": "warning",
+          "message": "Numeric values not published; records remain usable",
+          "column": "LATITUD",
+          "count": 268,
+          "examples": [
+            "10040803",
+            "10040808",
+            "10040811",
+            "10040812",
+            "10040804"
+          ],
+          "category": "quality"
+        },
+        {
+          "code": "missing_numeric_values",
+          "severity": "warning",
+          "message": "Numeric values not published; records remain usable",
+          "column": "LONGITUD",
+          "count": 268,
+          "examples": [
+            "10040803",
+            "10040808",
+            "10040811",
+            "10040812",
+            "10040804"
+          ],
+          "category": "quality"
+        }
+      ],
+      "data_pages": 5
+    },
+    {
+      "dataset_id": "madrid_parking",
+      "source_rows": null,
+      "normalized_rows": 63,
+      "columns": 32,
+      "reference_url": "https://datos.madrid.es/api/3/action/datastore_search?resource_id=202625-3-aparcamientos-publicos-csv",
+      "reference_file": "madrid_parking-reference.bin",
+      "reference_sha256": "18db03f3f19a9fe1fc69e62a2d91822a6d2f5780a8dccfd909ade0e27beb983d",
+      "canonical_sha256": "0f83a847d211801ec4939111f0588b381bf2c772c0b7328c3b834fd432e3f305",
+      "independent_format_matches_all_records": true,
+      "first_run": 5,
+      "second_run": 6,
+      "second_stats": {
+        "baseline": false,
+        "added": 0,
+        "removed": 0,
+        "modified": 0,
+        "unchanged": 63,
+        "current_rows": 63,
+        "previous_rows": 63,
+        "window_expired": 0,
+        "unexpected_removed": 0,
+        "suppressed_fields": 0
+      },
+      "replays": [
+        {
+          "run_id": 5,
+          "reproduced": true,
+          "verification_levels": {
+            "snapshot": true,
+            "configured_quality_checks": true,
+            "complete_semantic_events": true,
+            "semantic_statistics": true,
+            "normalized_schema": true
+          },
+          "not_verified": [
+            "source provenance",
+            "raw source schema",
+            "all report findings",
+            "incident transitions",
+            "operator decisions",
+            "historical HTTP availability"
+          ],
+          "canonical_sha256": "0f83a847d211801ec4939111f0588b381bf2c772c0b7328c3b834fd432e3f305",
+          "checks_replayed": 5,
+          "network_used": false
+        },
+        {
+          "run_id": 6,
+          "reproduced": true,
+          "verification_levels": {
+            "snapshot": true,
+            "configured_quality_checks": true,
+            "complete_semantic_events": true,
+            "semantic_statistics": true,
+            "normalized_schema": true
+          },
+          "not_verified": [
+            "source provenance",
+            "raw source schema",
+            "all report findings",
+            "incident transitions",
+            "operator decisions",
+            "historical HTTP availability"
+          ],
+          "canonical_sha256": "0f83a847d211801ec4939111f0588b381bf2c772c0b7328c3b834fd432e3f305",
+          "checks_replayed": 5,
+          "network_used": false
+        }
+      ],
+      "observed_findings": [
+        {
+          "code": "rule_numeric",
+          "rule_id": "longitude",
+          "category": "quality",
+          "severity": "warning",
+          "column": "LONGITUD",
+          "message": "numeric check exceeded its declared contract",
+          "count": 1,
+          "examples": [
+            "36269"
+          ]
+        }
+      ],
+      "data_pages": 1
+    }
+  ],
+  "integrity": {
+    "verification_level": "storage_integrity_only",
+    "ok": true,
+    "problems": [],
+    "snapshots": 3,
+    "runs": 6
+  },
+  "packages": {
+    "civicdata-sentinel": "0.2.1",
+    "httpx": "0.28.1",
+    "pydantic": "2.14.3",
+    "filelock": "4.2.9",
+    "streamlit": "1.66.1"
+  },
+  "github_execution": false,
+  "multi_day_observation": false
+}

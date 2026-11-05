@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timedelta
+from datetime import timezone as utc_timezone
 from fnmatch import fnmatchcase
 from zoneinfo import ZoneInfo
 
@@ -29,7 +30,29 @@ def unpivot(rows, fields, spec):
                     raise ValueError("hour outside 1..24")
                 # Publisher H24 is the hour ending at next midnight. Keep slot and
                 # local date components too; source representation remains available.
-                stamp = (day + timedelta(hours=hour)).replace(tzinfo=timezone)
+                wall = day + timedelta(hours=hour)
+                candidates = {}
+                for fold in (0, 1):
+                    candidate = wall.replace(tzinfo=timezone, fold=fold)
+                    instant = candidate.astimezone(utc_timezone.utc)
+                    if instant.astimezone(timezone).replace(tzinfo=None) == wall:
+                        candidates[instant] = candidate
+                if not candidates:
+                    if spec.get("nonexistent_time") == "omit_unavailable" and row[flag] in spec.get(
+                        "unavailable_flags", ["N"]
+                    ):
+                        continue
+                    raise IngestionError(f"Nonexistent local hour: {wall.isoformat()} ({field})")
+                if len(candidates) > 1:
+                    policy = spec.get("ambiguous_time", "reject")
+                    if policy == "reject":
+                        raise IngestionError(
+                            f"Ambiguous local hour: {wall.isoformat()} ({field}); publisher fold required"
+                        )
+                    instant = min(candidates) if policy == "earlier" else max(candidates)
+                    stamp = candidates[instant]
+                else:
+                    stamp = next(iter(candidates.values()))
                 output.append(
                     {
                         **{c: row[c] for c in ids},

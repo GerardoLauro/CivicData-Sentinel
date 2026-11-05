@@ -141,6 +141,10 @@ class Unpivot(ContractModel):
     value_pattern: str = "H??"
     flag_prefix: str = "V"
     expected_slots: int = Field(default=24, ge=1, le=24)
+    hour_semantics: Literal["local_hour_ending"] = "local_hour_ending"
+    nonexistent_time: Literal["reject", "omit_unavailable"] = "reject"
+    ambiguous_time: Literal["reject", "earlier", "later"] = "reject"
+    unavailable_flags: list[str] = Field(default_factory=lambda: ["N"])
     date_columns: list[str] = Field(min_length=3, max_length=3)
     timezone: str
 
