@@ -35,7 +35,7 @@ jobs:
           sentinel alerts --db state/sentinel.sqlite > reports/incident-transitions.json
       - name: Persist state on separate branch
         if: ${{ always() && env.RUN_EXIT_CODE != '' }}
-        run: python scripts/state_branch.py persist
+        run: python scripts/state_branch.py persist --public-state
       - name: Retain evidence even if state push fails
         if: always()
         uses: actions/upload-artifact@v4

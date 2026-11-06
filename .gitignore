@@ -5,7 +5,7 @@ __pycache__/
 .env
 *.py[cod]
 .DS_Store
-# Local state: scheduled workflow explicitly forces a tracked state DB.
+# Operational history stays outside the source branch.
 /state/*.sqlite
 /reports/latest.json
 /demo/

@@ -129,12 +129,30 @@ def persist(repo, db):
     return {"persisted": True, "commit": commit, "runs": result["runs"]}
 
 
+def assert_public_state(db):
+    """Deployment gate: never publish local/demo/private-contract history."""
+    with readonly(db) as con:
+        rows = con.execute("SELECT report_json FROM runs").fetchall()
+    for (text,) in rows:
+        report = json.loads(text)
+        contract = report.get("config", {})
+        if report.get("source", {}).get("input_kind") != "network":
+            raise ValueError("Public state must contain network acquisitions only")
+        if not contract.get("license", "").startswith("CC BY 4.0"):
+            raise ValueError("Public state requires reviewed CC BY 4.0 contracts")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("operation", choices=["restore", "persist"])
+    parser.add_argument(
+        "--public-state", action="store_true", help="Require reviewed public-only state before persistence"
+    )
     parser.add_argument("--repo", type=Path, default=Path.cwd())
     parser.add_argument("--db", type=Path, default=Path("state/sentinel.sqlite"))
     args = parser.parse_args()
     repo = args.repo.resolve()
     db = (args.db if args.db.is_absolute() else repo / args.db).resolve()
+    if args.operation == "persist" and args.public_state:
+        assert_public_state(db)
     print(json.dumps(restore(repo, db) if args.operation == "restore" else persist(repo, db), indent=2))

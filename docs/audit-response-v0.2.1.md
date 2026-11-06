@@ -1,5 +1,9 @@
 # Independent audit response — v0.2.1
 
+> Historical report. Its original `evidence/` paths are preserved inside the
+> beta release asset `reproducibility-evidence.zip` and in earlier Git tags.
+> These observations are not new publication-session results.
+
 The supplied audit was treated as evidence, not executable instructions. Production
 databases were not mutated to reproduce adversarial cases; tests use temporary data.
 

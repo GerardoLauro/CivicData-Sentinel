@@ -1,8 +1,0 @@
-{
-  "tests": 97,
-  "failures": 0,
-  "errors": 0,
-  "coverage_percent": 90.0,
-  "scope": "Windows Python 3.12.2; offline suite and local Git integration",
-  "independent_audit_regressions": 8
-}

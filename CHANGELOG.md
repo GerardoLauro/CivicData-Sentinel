@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.2-beta — 2026-11-06
+
+- Prepare public source layout, contribution/security policies and configuration examples.
+- Archive bulky historical evidence as release assets; preserve Git history and valid tags.
+- Remove municipal archive dependency from migration tests using a synthetic legacy database.
+- Add clean distribution builds/checks to CI and manual CI dispatch.
+- Document public-state privacy/growth implications and gate public persistence.
+- Correct browser-observed separator/icon encoding residue and header clearance.
+- Operational GitHub and browser validation recorded separately as actually executed.
+
 ## 0.2.1 — 2026-11-05
 
 - Reject nonexistent and ambiguous local hours by default; explicit omission of unavailable gap slots or fold selection requires a contract.

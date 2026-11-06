@@ -1,5 +1,9 @@
 # v0.2.0 verification and limits
 
+> Historical report. Its original `evidence/` paths are preserved inside the
+> beta release asset `reproducibility-evidence.zip` and in earlier Git tags.
+> These observations are not new publication-session results.
+
 Machine-readable evidence is in `evidence/v0.2.0/`. Original 0.1.1 evidence remains
 under its original directories and is not presented as a new test result.
 

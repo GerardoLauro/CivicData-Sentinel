@@ -7,4 +7,7 @@ recursive-include tests *.py *.csv
 recursive-include .github *.yml
 include .streamlit/config.toml
 include evidence/NOTICE.md
-include evidence/2026-11-05/history.sqlite
+include evidence/README.md
+include CONTRIBUTING.md SECURITY.md
+recursive-include examples *.yaml
+recursive-include docs/assets *.png

@@ -1,5 +1,5 @@
 import gzip
-from pathlib import Path
+import json
 
 import pytest
 
@@ -121,10 +121,27 @@ def test_rule_threshold_change_keeps_baseline_identity(tmp_path, contract, csv_f
 
 
 def test_legacy_database_migrates_without_modifying_snapshots(tmp_path):
-    source = Path(__file__).resolve().parents[1] / "evidence/2026-11-05/history.sqlite"
+    import sqlite3
+
+    from civicdata_sentinel.engine import fingerprint
+
     db = tmp_path / "legacy.sqlite"
-    db.write_bytes(source.read_bytes())
+    rows = {str(i): {"ID": str(i)} for i in range(3)}
+    digest = fingerprint(rows)
+    report = {"schema_version": "1.0", "status": "success", "digest": digest, "source": {"input_kind": "network"}}
+    with sqlite3.connect(db) as old:
+        old.executescript(
+            "CREATE TABLE snapshots(dataset_id TEXT,digest TEXT,first_seen TEXT,rows_json_gz BLOB,PRIMARY KEY(dataset_id,digest)); CREATE TABLE runs(id INTEGER PRIMARY KEY AUTOINCREMENT,dataset_id TEXT,checked_at TEXT,status TEXT,digest TEXT,report_json TEXT);"
+        )
+        old.execute(
+            "INSERT INTO snapshots VALUES (?,?,?,?)",
+            ("legacy_synthetic", digest, "2026-01-01T00:00:00+00:00", gzip.compress(json.dumps(rows).encode())),
+        )
+        old.execute(
+            "INSERT INTO runs(dataset_id,checked_at,status,digest,report_json) VALUES (?,?,?,?,?)",
+            ("legacy_synthetic", "2026-01-01T00:00:00+00:00", "success", digest, json.dumps(report)),
+        )
     with connect(db) as con:
-        digest, records = load_previous(con, "madrid_fountains")
-        assert len(records) == 2314 and integrity(con)["ok"]
+        digest, records = load_previous(con, "legacy_synthetic")
+        assert len(records) == 3 and integrity(con)["ok"]
         assert con.execute("PRAGMA user_version").fetchone()[0] == 2

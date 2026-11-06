@@ -1,0 +1,12 @@
+dataset_id: example_inventory
+title: Example public inventory
+primary_key: ID
+source:
+  type: url
+  url: https://example.org/public-inventory.csv
+required_columns: [ID, name]
+checks:
+  - id: required-name
+    kind: completeness
+    column: name
+    severity: error

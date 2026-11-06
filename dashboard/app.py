@@ -12,10 +12,10 @@ from civicdata_sentinel import __version__
 from civicdata_sentinel.exporting import event_csv, report_export
 from civicdata_sentinel.storage import full_events, incidents, latest_by_stream, readonly, recent_runs
 
-st.set_page_config(page_title="CivicData Sentinel", page_icon="â—‰", layout="wide")
+st.set_page_config(page_title="CivicData Sentinel", page_icon="S", layout="wide")
 st.markdown(
     """<style>
-.block-container {padding-top:2.2rem; max-width:1450px;}
+.block-container {padding-top:4rem; max-width:1450px;}
 [data-testid="stMetric"] {background:white;border:1px solid #e1e8ed;border-radius:12px;padding:16px;}
 h1 {letter-spacing:-0.04em;} [data-testid="stSidebar"] {border-right:1px solid #e1e8ed;}
 </style>""",
@@ -206,7 +206,7 @@ with inspector:
             "Inspect check",
             ids,
             format_func=lambda i: (
-                f"#{i} Â| {names[by_id[i]['dataset_id']]} Â| {by_id[i]['status']} Â| {by_id[i]['checked_at']}"
+                f"#{i} | {names[by_id[i]['dataset_id']]} | {by_id[i]['status']} | {by_id[i]['checked_at']}"
             ),
         )
         report = by_id[chosen]
@@ -254,7 +254,7 @@ with inspector:
         shown = [e for e in events if (event_type == "All changes" or e["type"] == event_type) and query in e["id"]]
         pages = max(1, (len(shown) + 99) // 100)
         page = st.number_input("Event page", min_value=1, max_value=pages, value=1, step=1)
-        st.caption(f"{len(shown):,} matching events Â| page {page} of {pages} Â| downloads include every event")
+        st.caption(f"{len(shown):,} matching events | page {page} of {pages} | downloads include every event")
         st.dataframe(
             [
                 {

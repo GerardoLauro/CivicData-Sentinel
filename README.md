@@ -1,61 +1,73 @@
 # CivicData Sentinel
 
-**Evidence-first monitoring for public data. Version 0.2.1.**
+[![Quality gates](https://github.com/GerardoLauro/CivicData-Sentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/GerardoLauro/CivicData-Sentinel/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-0.2.2--beta-orange.svg)](CHANGELOG.md)
 
-Track meaningful record changes, validate dataset contracts and keep replayable
-evidence. Suspicious publications can be quarantined without replacing trusted
-history. Local experiments are isolated from live monitoring.
+**Explainable monitoring and replayable evidence for public datasets.**
 
-## What is different
+Public feeds can change structure, publish partial snapshots or silently revise
+records. CivicData Sentinel separates acquisition failures, meaningful changes
+and quality findings, keeping an auditable trusted baseline.
 
-- Complete record events, not just samples, linked to runs and content-addressed snapshots.
-- Explicit numeric equivalence, tolerances and ignored metadata reduce avoidable noise.
-- Rolling-window expiry distinguishes expected expiration from unexpected removals.
-- Versioned YAML contracts cover composite keys, schema drift, completeness, uniqueness,
-  domains, regex, numeric limits, numeric revisions, median shifts and timestamp freshness.
-- Quarantine and audited approval preserve the last trusted baseline.
-- Original parser inputs and JSON responses are retained for offline replay.
-- Incident lifecycle and cursor-based outbox prevent repeated findings becoming repeated alerts.
-- Read-only Streamlit observatory: overview, history, changes, incident filters and complete exports.
-- Hourly GitHub workflow restores and persists verified state on a separate branch.
+## Features
 
-## Verified real datasets
+- CSV, CKAN discovery/DataStore pagination and flat JSON feeds.
+- Validated YAML contracts, composite keys, schema profiles and conditional checks.
+- Completeness, uniqueness, domains, numeric limits/revisions and freshness rules.
+- Numeric equivalence/tolerances and rolling-window expiration, explicitly configured.
+- Quarantine and reviewed approval: suspicious publications cannot silently replace trust.
+- Full events, compressed input artifacts, SHA-256 integrity and offline semantic replay.
+- Deduplicated incident lifecycle and cursor-based outbox; no external messages by default.
+- Read-only Streamlit dashboard with dataset/date/severity filters and complete exports.
+- Hourly monitoring with portable state persisted separately from source commits.
 
-| Dataset | Published rows | Normalized records | Independent comparison |
-| --- | ---: | ---: | --- |
-| Madrid drinking fountains | 2,314 | 2,314 | CKAN vs official CSV |
-| Madrid hourly air measurements | 126 | 3,024 | JSON vs CSV |
-| Madrid municipal parking inventory | 63 | 63 | CSV vs CKAN |
+![Local dashboard showing observed Madrid data on 6 November 2026](docs/assets/dashboard-overview.png)
 
-Six live acquisitions on 5 November 2026 matched independent formats record for
-record and replayed offline. Their immediate second acquisitions showed no changes;
-this is not a multi-day stability result. Air validity flags exclude unavailable
-slots from numeric/freshness checks. Parking is an inventory, not live occupancy.
+The screenshot is from the local application and contains actual stored network
+observations. It does not depict a hosted dashboard.
 
-Observed findings: 268 missing latitudes and longitudes in the fountains data;
-parking record `36269` publishes longitude `--3.65138632197171`. Values are preserved,
-not silently corrected. See [live evidence](evidence/v0.2.0/live/summary.json).
+## Architecture
 
-## Run locally
+```text
+HTTPS feed -> bounded acquisition -> parse/normalize -> structural gate
+    -> quality checks + semantic diff -> trust decision
+    -> transactional SQLite audit -> CLI / JSON exports / Streamlit
+```
 
-Requires **Python 3.11+**. From this repository root:
+Python 3.11+, HTTPX, PyYAML, Pydantic, filelock, SQLite and Streamlit.
+The engine is deterministic and independent of CivicWater; no AI service is needed.
+
+## Installation and quick start
+
+From the repository root:
 
 ```bash
 python -m venv .venv
-# Windows: .venv/Scripts/Activate.ps1
 # Linux/macOS: source .venv/bin/activate
+# Windows PowerShell: .venv/Scripts/Activate.ps1
 python -m pip install -e '.[test,dashboard,dev]'
 sentinel catalog
 sentinel run-all
 streamlit run dashboard/app.py
 ```
 
-On Windows, double-click `Start-Dashboard.cmd` after installing dependencies.
-The Desktop directory is the canonical development repository. No GitHub remote
-has been configured or published. To inspect bundled clean live checks, select
-`evidence/v0.2.0/live/history.sqlite` in the dashboard history-file field.
+Windows users can run `Start-Dashboard.cmd` after installation. The dashboard is a
+local application; this repository does not deploy a public dashboard service.
 
-## Operations
+## Included datasets
+
+| Contract | Source | Interpretation |
+| --- | --- | --- |
+| madrid_fountains | Ayuntamiento de Madrid drinking fountains | Inventory and published operational state |
+| madrid_air | Madrid provisional hourly air measurements | Validity-qualified readings; unavailable slots are not valid zeros |
+| madrid_parking | Madrid municipal parking facilities | Inventory, not real-time occupancy |
+
+Counts vary over time. Captured v0.2.1 checks contained 2,314 fountains, 63 parking
+facilities and 126 air rows expanded into 3,024 hourly slots. These are historical
+observations, not promises of current source availability or environmental safety.
+
+## CLI
 
 ```bash
 sentinel run --config configs/madrid_air.yaml
@@ -68,19 +80,23 @@ sentinel verify
 sentinel backup --output backups/history.sqlite
 sentinel incidents --state open
 sentinel alerts --after 0
-sentinel approve --run 7 --reason 'Reviewed source publication and confirmed intentional change'
+sentinel approve --run 7 --reason 'Reviewed publication and confirmed intended change'
 ```
 
-Only valid quarantined candidates can be approved; newer trusted heads cannot be
-overwritten. Approval is an additional audit decision, not a rewrite of the original
-run. Exit codes: 0 accepted, 1 acquisition/operation failed, 2 quarantined, 3 an
-explicit `--fail-on` threshold was reached. Warnings normally remain accepted.
+Exit codes: 0 accepted, 1 failed, 2 quarantined, 3 an explicitly requested
+`--fail-on` threshold was reached. Warnings are normally accepted. Local CSV input
+uses a separate stream: `sentinel run --input tests/fixtures/fountains_base.csv
+--db demo/state.sqlite --output demo/report.json`. This example is synthetic.
 
-Local `--input` CSV checks use a separate comparison stream. Keep synthetic demos
-in a separate database too. `sentinel migrate --db old.sqlite` additively upgrades
-v0.1 history; back it up first. Legacy sampled events cannot be reconstructed.
+## Add a dataset
 
-## Reproduce checks
+Copy [examples/public_csv.yaml](examples/public_csv.yaml), replace the placeholder
+URL and declare stable keys, source license and sensible checks. Existing supported
+formats need no core-code change. Validate with `sentinel catalog --configs configs`.
+The full editor schema is [docs/config.schema.json](docs/config.schema.json).
+See [example outcomes](docs/examples.md) for abbreviated, clearly labelled output.
+
+## Testing and reproducibility
 
 ```bash
 python -m pytest --cov=civicdata_sentinel
@@ -88,46 +104,44 @@ python -m ruff check src tests dashboard scripts
 python -m ruff format --check src tests dashboard scripts
 python -m pip check
 python -m pip_audit --skip-editable
-python scripts/verify_catalog_live.py --output evidence/new-live-check
+python -m build
+python scripts/verify_catalog_live.py --output reports/new-live-check
 python scripts/verify_workflow_local.py --output reports/new-runner-check
 python scripts/benchmark_semantics.py --output reports/benchmark.json
 ```
 
-Live and runner-verification output directories must be new. Live failures or
-cross-format disagreements fail explicitly. Synthetic benchmark results validate
-constructed cases only, not a general real-world false-positive rate.
+Use new directories for live/runner checks. Live tests use actual network data;
+unit and local-runner faults are synthetic. Reproducibility bundles are release
+assets, described in [evidence/README.md](evidence/README.md). Historical evidence
+and existing Git tags remain intact. Failed cross-format comparisons are reported,
+never silently skipped. Replay explicitly lists verified levels and exclusions.
 
-## Automation
+## Operation and limitations
 
-The monitor runs at minute 17 of every hour (UTC). Scheduling and repository token
-permissions still require a first GitHub-hosted run after publication. State lives
-on `sentinel-state`, separate from source commits. Restore verifies compressed and
-database hashes. Persistence uses SQLite backup and ordinary Git push; concurrent
-updates are rejected. Artifacts retain reports and a portable database even if push
-fails. Do not manually edit the state branch. See [operations](docs/operations.md).
+The scheduled monitor runs at minute 17 of each UTC hour, subject to GitHub delays.
+See [operational instructions](docs/operations.md) and the explicit
+[public-state assessment](docs/public-state-assessment.md). The public state branch
+contains only public network acquisitions with reviewed licensing. Private feeds
+require private external storage. State grows without automatic retention.
 
-No external notifications are sent. The deduplicated outbox supports future Issues
-or webhook integrations without coupling the engine to an account or spamming
-repeated findings. CI includes Windows/Linux, Python 3.11/3.12, lint, tests and audit;
-only Windows/Python 3.12.2 has been executed locally.
+API pagination is not transactionally isolated. Limits: 20 MB acquisition,
+100,000 normalized rows, 250 MB portable state. One host serializes writers.
+Schema types are inferred, and numeric bounds are sanity checks, not legal limits.
+Yearly resource IDs require maintenance. Dashboard history displays a bounded
+1,000-attempt window; CLI history is paginated and complete events are exportable.
+Ambiguous autumn hours are rejected unless the source's fold is explicitly known.
+Storage integrity is not semantic attestation; replay does not certify provenance,
+all report findings, incident transitions or historical network availability.
 
-## Documentation and licensing
+Deployment results, run links and unresolved gates are recorded in release notes;
+configured workflows must not be mistaken for executed/scheduled observations.
 
-- [Architecture and trust model](docs/architecture.md)
-- [Critical analysis and alternatives](docs/design-decisions.md)
-- [Verification and limitations](docs/verification-v0.2.0.md)
-- [Configuration JSON Schema](docs/config.schema.json)
-- [Changelog](CHANGELOG.md)
+## Development, security and license
 
-Code: MIT. Madrid data: Ayuntamiento de Madrid, CC BY 4.0; see
-[data attribution](evidence/NOTICE.md). Independent of CivicWater. No AI is needed
-for these deterministic checks, and no scientific novelty is claimed for the algorithms.
+[Architecture](docs/architecture.md) · [Design decisions](docs/design-decisions.md) ·
+[Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Changelog](CHANGELOG.md).
 
-## v0.2.1 audit hardening
-
-The independent v0.2.0 audit led to DST-gap/fold contracts, controlled malformed
-DEFLATE diagnostics and semantic replay of every stored event, aggregate and
-normalized-schema change. See [audit response](docs/audit-response-v0.2.1.md).
-Storage integrity is explicitly labelled storage-only; it is not semantic replay.
-Replay reports each verified level and exclusions; it is not full provenance or
-incident-lifecycle attestation. Historical v0.2.0 verification remains archived.
+Code: [MIT](LICENSE). Municipal data: **Ayuntamiento de Madrid**, CC BY 4.0.
+See [attribution](evidence/NOTICE.md). No publisher endorsement is implied.
+Runtime dependencies retain their own distributions/licenses; competitor code was
+not copied. This is beta software with documented operational limits.

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "civicdata-sentinel"
-version = "0.2.1"
+version = "0.2.2b0"
 description = "Lightweight, explainable monitoring for public CSV datasets"
 readme = "README.md"
 requires-python = ">=3.11"

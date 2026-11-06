@@ -1,5 +1,9 @@
 # Verification — 5 November 2026
 
+> Historical report. Its original `evidence/` paths are preserved inside the
+> beta release asset `reproducibility-evidence.zip` and in earlier Git tags.
+> These observations are not new publication-session results.
+
 ## Starting point
 
 Work continued from the supplied `CivicData-Sentinel-v0.1.0.zip`, SHA-256
@@ -10,9 +14,9 @@ CSV produced 106 `invalid_values` warnings because two status names were wrong.
 
 ## Observed live acquisition
 
-Evidence: [`summary.json`](../evidence/2026-11-05/summary.json),
-[`requests.json`](../evidence/2026-11-05/requests.json),
-[`CSV discovery`](../evidence/checks/csv-discovery.json).
+Evidence: [`summary.json`](https://github.com/GerardoLauro/CivicData-Sentinel/blob/v0.2.1/evidence/2026-11-05/summary.json),
+[`requests.json`](https://github.com/GerardoLauro/CivicData-Sentinel/blob/v0.2.1/evidence/2026-11-05/requests.json),
+[`CSV discovery`](https://github.com/GerardoLauro/CivicData-Sentinel/blob/v0.2.1/evidence/checks/csv-discovery.json).
 
 At 10:13:07–10:13:18 UTC (11:13:07–11:13:18 Rome), the verifier downloaded current
 resource metadata and the official CSV, performed two network-based monitor runs,
@@ -66,7 +70,7 @@ Streamlit **1.66.1** was checked with AppTest against the real two-run database:
 no app exceptions, two displayed history rows, no local-input warning and no
 change to the SQLite bytes. A temporary headless server returned HTTP **200** for
 both `/_stcore/health` (`ok`) and the frontend page, then was stopped. This is not
-a visual browser review. See [`dashboard.json`](../evidence/checks/dashboard.json).
+a visual browser review. See [`dashboard.json`](https://github.com/GerardoLauro/CivicData-Sentinel/blob/v0.2.1/evidence/checks/dashboard.json).
 
 Local Python was **3.12.2**, HTTPX **0.28.1**, PyYAML **6.0.3**, pytest **9.2.0**.
 The CI matrix specifies Python 3.10 and 3.12; Python 3.10 was not run locally.
@@ -90,7 +94,7 @@ Git remote. Each attempt started in a fresh clone:
    2 snapshots; the last successful baseline remained unchanged.
 
 The failure report and history were committed locally before the failure status
-was surfaced. See [`workflow-local.json`](../evidence/checks/workflow-local.json)
+was surfaced. See [`workflow-local.json`](https://github.com/GerardoLauro/CivicData-Sentinel/blob/v0.2.1/evidence/checks/workflow-local.json)
 and run `scripts/verify_workflow_local.py` to reproduce this isolated simulation.
 
 **Pending:** actual GitHub-hosted execution, scheduler timing, token permissions,
@@ -119,4 +123,4 @@ DataStore result files are actual returned result objects serialized as JSON,
 not the original wire bytes. `official.csv` and resource metadata responses retain
 the downloaded bytes. The live `sha256.json` lists their stored-file hashes.
 
-Dataset attribution and transformations are in [evidence/NOTICE.md](../evidence/NOTICE.md).
+Dataset attribution and transformations are in [evidence/NOTICE.md](https://github.com/GerardoLauro/CivicData-Sentinel/blob/v0.2.1/evidence/NOTICE.md).
