@@ -5,7 +5,7 @@
 - Prepare public source layout, contribution/security policies and configuration examples.
 - Archive bulky historical evidence as release assets; preserve Git history and valid tags.
 - Remove municipal archive dependency from migration tests using a synthetic legacy database.
-- Add clean distribution builds/checks to CI and manual CI dispatch.
+- Add clean distribution builds/checks and retained coverage/packages to CI; main pushes and PRs are checked without duplicate dependency-branch runs.
 - Document public-state privacy/growth implications and gate public persistence.
 - Correct browser-observed separator/icon encoding residue and header clearance.
 - Operational GitHub and browser validation recorded separately as actually executed.

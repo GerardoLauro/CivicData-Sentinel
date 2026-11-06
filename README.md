@@ -133,7 +133,8 @@ Ambiguous autumn hours are rejected unless the source's fold is explicitly known
 Storage integrity is not semantic attestation; replay does not certify provenance,
 all report findings, incident transitions or historical network availability.
 
-Deployment results, run links and unresolved gates are recorded in release notes;
+[Operational validation](docs/publication-validation.md) records observed runs,
+artifacts and unresolved gates. Final commit/run links are also in release notes;
 configured workflows must not be mistaken for executed/scheduled observations.
 
 ## Development, security and license
