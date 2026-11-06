@@ -126,7 +126,7 @@ contains only public network acquisitions with reviewed licensing. Private feeds
 require private external storage. State grows without automatic retention.
 
 API pagination is not transactionally isolated. Limits: 20 MB acquisition,
-100,000 normalized rows, 250 MB portable state. One host serializes writers.
+100,000 normalized rows, 250 MB portable state and 90 MB compressed Git transport. One host serializes writers.
 Schema types are inferred, and numeric bounds are sanity checks, not legal limits.
 Yearly resource IDs require maintenance. Dashboard history displays a bounded
 1,000-attempt window; CLI history is paginated and complete events are exportable.

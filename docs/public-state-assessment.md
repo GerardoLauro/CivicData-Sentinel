@@ -19,3 +19,12 @@ before monitoring non-public data or substantially larger/longer-lived feeds.
 Contents-write is restricted to the monitoring job because state persistence needs
 it; CI uses read-only access. State-branch pushes do not trigger source CI and
 cannot trigger the dispatch/schedule-only monitor recursively.
+
+
+The operational patch also caps the compressed Git object at 90 MB, below GitHub's
+[100 MiB file limit](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github).
+The uncompressed database cap alone was insufficient for poorly compressible
+history. Oversized data is rejected before creating/pushing Git objects, leaving
+the prior checkpoint unchanged; migrate to external storage rather than prune
+scientific evidence automatically. New manifests include measured byte sizes,
+both limits and an 80% capacity warning; legacy manifests still restore.

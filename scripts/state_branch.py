@@ -20,6 +20,7 @@ from civicdata_sentinel.storage import backup, integrity, readonly
 
 BRANCH = "refs/heads/sentinel-state"
 MAX_STATE_BYTES = STATE_LIMIT_BYTES
+MAX_ARCHIVE_BYTES = 90_000_000
 
 
 def git(repo, *args, data=None, env=None):
@@ -46,6 +47,8 @@ def restore(repo, db):
         raise ValueError("State changed during restore; retry without starting a new baseline")
     manifest = json.loads(git(repo, "show", "FETCH_HEAD:state/manifest.json"))
     packed = git(repo, "show", "FETCH_HEAD:state/history.sqlite.gz")
+    if len(packed) > MAX_ARCHIVE_BYTES:
+        raise ValueError("Compressed state exceeds the 90 MB Git transport limit; use external storage")
     if hashlib.sha256(packed).hexdigest() != manifest["compressed_sha256"]:
         raise ValueError("Downloaded state archive hash mismatch")
     import io
@@ -89,12 +92,16 @@ def persist(repo, db):
             raise ValueError("State exceeds the 250 MB MVP limit; move to external storage")
         content = portable.read_bytes()
     packed = gzip.compress(content, mtime=0)
+    if len(packed) > MAX_ARCHIVE_BYTES:
+        raise ValueError("Compressed state exceeds the 90 MB Git transport limit; use external storage")
     manifest = {
         "schema_version": 2,
         "runs": result["runs"],
         "database_bytes": len(content),
         "compressed_bytes": len(packed),
         "limit_bytes": MAX_STATE_BYTES,
+        "archive_limit_bytes": MAX_ARCHIVE_BYTES,
+        "capacity_warning": len(content) >= 0.8 * MAX_STATE_BYTES or len(packed) >= 0.8 * MAX_ARCHIVE_BYTES,
         "database_sha256": hashlib.sha256(content).hexdigest(),
         "compressed_sha256": hashlib.sha256(packed).hexdigest(),
     }
@@ -130,7 +137,14 @@ def persist(repo, db):
     # The parent is the restored commit; ordinary push rejects concurrent writers.
     git(repo, "push", "origin", f"{commit}:{BRANCH}")
     marker.write_text(commit, encoding="ascii")
-    return {"persisted": True, "commit": commit, "runs": result["runs"]}
+    return {
+        "persisted": True,
+        "commit": commit,
+        "runs": result["runs"],
+        "database_bytes": len(content),
+        "compressed_bytes": len(packed),
+        "capacity_warning": manifest["capacity_warning"],
+    }
 
 
 def assert_public_state(db):

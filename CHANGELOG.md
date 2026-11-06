@@ -5,7 +5,7 @@
 - Pin reviewed official Actions v7 commits, group future action updates and bound CI job duration.
 - Remove persisted checkout credentials from read-only CI jobs; scope write permission to the monitor job.
 - Add read-only operational JSON/job summaries: acquisition versus data health, timeliness and storage warning at 80% of the 250 MB limit.
-- Include database/compressed sizes in state manifests; preserve backwards-compatible restoration.
+- Include database/compressed sizes and capacity warnings in state manifests; cap compressed Git transport at 90 MB before object creation; preserve legacy restoration.
 - Move the hourly schedule to minute 7 UTC and re-enable it; actual trigger observation is recorded separately.
 - Preserve all earlier tags and operational history; no automatic pruning or external messages.
 
