@@ -2,7 +2,7 @@
 
 [![Quality gates](https://github.com/GerardoLauro/CivicData-Sentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/GerardoLauro/CivicData-Sentinel/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.2.2--beta-orange.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.2.3--beta-orange.svg)](CHANGELOG.md)
 
 **Explainable monitoring and replayable evidence for public datasets.**
 
@@ -77,6 +77,7 @@ sentinel export --run 1 --format json --output reports/full.json
 sentinel export --run 1 --format csv --output reports/events.csv
 sentinel replay --run 1
 sentinel verify
+python scripts/operational_summary.py --db state/sentinel.sqlite
 sentinel backup --output backups/history.sqlite
 sentinel incidents --state open
 sentinel alerts --after 0
@@ -118,7 +119,7 @@ never silently skipped. Replay explicitly lists verified levels and exclusions.
 
 ## Operation and limitations
 
-The scheduled monitor runs at minute 17 of each UTC hour, subject to GitHub delays.
+The scheduled monitor runs at minute 7 of each UTC hour, subject to GitHub delays.
 See [operational instructions](docs/operations.md) and the explicit
 [public-state assessment](docs/public-state-assessment.md). The public state branch
 contains only public network acquisitions with reviewed licensing. Private feeds

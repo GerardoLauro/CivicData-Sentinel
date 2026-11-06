@@ -15,10 +15,11 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+from civicdata_sentinel.operations import STATE_LIMIT_BYTES
 from civicdata_sentinel.storage import backup, integrity, readonly
 
 BRANCH = "refs/heads/sentinel-state"
-MAX_STATE_BYTES = 250_000_000
+MAX_STATE_BYTES = STATE_LIMIT_BYTES
 
 
 def git(repo, *args, data=None, env=None):
@@ -91,6 +92,9 @@ def persist(repo, db):
     manifest = {
         "schema_version": 2,
         "runs": result["runs"],
+        "database_bytes": len(content),
+        "compressed_bytes": len(packed),
+        "limit_bytes": MAX_STATE_BYTES,
         "database_sha256": hashlib.sha256(content).hexdigest(),
         "compressed_sha256": hashlib.sha256(packed).hexdigest(),
     }
