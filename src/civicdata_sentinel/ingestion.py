@@ -336,7 +336,8 @@ def _fetch_csv(cfg: dict) -> tuple[bytes, dict]:
             retired_endpoint = (
                 exc.kind == "http_status" and attempted and attempted[-1].get("http_status") in {404, 410}
             )
-            if not alternative or not (retired_endpoint or exc.kind == "provider_error"):
+            unavailable_transport = exc.kind in {"read_timeout", "connect_timeout", "timeout", "transport"}
+            if not alternative or not (retired_endpoint or unavailable_transport or exc.kind == "provider_error"):
                 raise
             if exc.kind == "provider_error" and (audit := CURRENT_AUDIT.get()) and audit.last_response:
                 record, raw = audit.last_response

@@ -56,3 +56,6 @@ policy:
 # Operational recovery only: same resource ID, confirmed inactive DataStore.
 acquisition:
   ckan_resource_fallback_api_url: https://datos.madrid.es/api/3/action
+  read_timeout_seconds: 15
+  max_attempts: 2
+  max_elapsed_seconds: 90

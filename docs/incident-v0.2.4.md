@@ -88,7 +88,7 @@ The CSV was discovered from live metadata, not a stale hardcoded filename.
   Transport timeouts with no bytes do not invent a response body/status.
 - Errors remain failed runs. Received prefixes/error envelopes cannot become empty
   accepted datasets. Successful retries retain the failed-attempt trace/evidence.
-- Opt-in fountains recovery requires a retired endpoint (404/410) or explicit CKAN
+- Opt-in fountains recovery requires a retired endpoint (404/410), transport unavailability or explicit CKAN
   failure, metadata naming the **same resource ID**, inactive DataStore and same
   HTTPS authority. Schema/quality/trust checks still run. Structural/pagination faults
   and rate limiting cannot be bypassed via this path. Recovery adds a source warning
@@ -135,3 +135,15 @@ fallback faults are synthetic. Historical logs/artifacts and live probes are sep
 The independent-format verifier now refuses to claim independence if the primary
 acquisition already used the same CSV fallback. Integrity/replay still have their
 documented exclusions; hashes alone are not a provenance attestation.
+
+
+## First corrected hosted probe
+
+Run [42794317418](https://github.com/GerardoLauro/CivicData-Sentinel/actions/runs/42794317418)
+showed ReadTimeout for air and, unlike the local HTTP 404, also for the old fountains
+DataStore route. Parking passed. State/artifacts were retained. The recovery gate
+was extended to exhausted transport errors, still requiring metadata confirming the
+same inactive resource; HTTP throttling, authentication and structural faults cannot
+use it. Fountains use two 15-second read attempts and a 90-second acquisition budget,
+leaving time to retrieve the verified CSV instead of spending the whole budget on
+the retired endpoint. No historical failed report was changed to success.

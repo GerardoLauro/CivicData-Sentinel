@@ -195,7 +195,7 @@ def test_interrupted_valid_csv_prefix_is_evidence_not_a_dataset(monkeypatch):
     assert caught.value.documents and all(a["body_truncated"] for a in caught.value.diagnostics["attempts"])
 
 
-@pytest.mark.parametrize("failure_shape", ["http_404", "ckan_error"])
+@pytest.mark.parametrize("failure_shape", ["http_404", "ckan_error", "read_timeout"])
 def test_same_resource_csv_fallback_keeps_live_baseline(tmp_path, contract, monkeypatch, failure_shape):
     cfg = contract(
         source={"type": "ckan_datastore", "api_url": "https://example.org/id/api/3/action", "resource_id": "same"},
@@ -211,6 +211,8 @@ def test_same_resource_csv_fallback_keeps_live_baseline(tmp_path, contract, monk
 
     def inactive(request):
         if request.url.path.endswith("datastore_search"):
+            if failure_shape == "read_timeout":
+                raise httpx.ReadTimeout("Synthetic unavailable DataStore", request=request)
             return (
                 httpx.Response(404, text="Synthetic maintenance page")
                 if failure_shape == "http_404"
@@ -232,10 +234,12 @@ def test_same_resource_csv_fallback_keeps_live_baseline(tmp_path, contract, monk
     assert recovered["status"] == "success" and recovered["health"] == "degraded"
     assert recovered["previous_digest"] == old["digest"] and not recovered["stats"]["baseline"]
     assert recovered["events"] == [] and recovered["source"]["distribution_fallback"]["resource_id"] == "same"
-    assert recovered["source"]["acquisition"]["attempts"][0]["http_status"] == (
-        404 if failure_shape == "http_404" else 200
+    first_attempt = recovered["source"]["acquisition"]["attempts"][0]
+    assert first_attempt.get("http_status") == (
+        None if failure_shape == "read_timeout" else 404 if failure_shape == "http_404" else 200
     )
-    assert any(a["kind"] == "acquisition_error_body" for a in recovered["artifacts"])
+    if failure_shape != "read_timeout":
+        assert any(a["kind"] == "acquisition_error_body" for a in recovered["artifacts"])
     assert any(i["code"] == "official_distribution_fallback" for i in recovered["issues"])
 
 
