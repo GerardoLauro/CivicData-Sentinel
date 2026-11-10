@@ -20,6 +20,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install -e .
+      - name: Record trigger evidence
+        run: python scripts/runner_context.py
       - name: Restore trusted state
         run: python scripts/state_branch.py restore
       - name: Collect all contracts

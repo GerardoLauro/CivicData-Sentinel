@@ -3,53 +3,174 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import io
 import json
+import logging
+import random
 import time
 from pathlib import Path
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 import httpx
 
+from .acquisition import (
+    BODY_LIMIT,
+    CURRENT_AUDIT,
+    AcquisitionAudit,
+    AcquisitionPolicy,
+    IngestionError,
+    retry_after_seconds,
+)
+
+LOG = logging.getLogger("civicdata_sentinel")
 MAX_BYTES = 20_000_000
-
-
-class IngestionError(RuntimeError):
-    pass
 
 
 def _get_bytes(url: str) -> bytes:
     parsed = urlparse(url)
-    if parsed.scheme != "https" or not parsed.netloc:
-        raise IngestionError("Only HTTPS source URLs are accepted")
-    for attempt in range(3):
+    if parsed.scheme != "https" or not parsed.netloc or parsed.username:
+        raise IngestionError("Only HTTPS source URLs without credentials are accepted", kind="unsafe_url")
+    audit = CURRENT_AUDIT.get() or AcquisitionAudit(AcquisitionPolicy())
+    policy = audit.policy
+    last = None
+    for attempt in range(1, policy.max_attempts + 1):
+        remaining = audit.remaining()
+        if remaining <= 0:
+            break
+        record = {"url": url, "attempt": attempt}
+        audit.attempts.append(record)
+        started = time.monotonic()
+        content = bytearray()
+        received = False
+        retry_after = None
+
+        def validate_hop(request):
+            if request.url.scheme != "https" or request.url.username:
+                raise IngestionError("Unsafe redirect target rejected before transmission", kind="unsafe_redirect")
+            available = audit.remaining()
+            if available <= 0:
+                raise IngestionError("Acquisition elapsed budget exceeded", kind="elapsed_budget")
+            request.extensions["timeout"] = {
+                "connect": min(policy.connect_timeout_seconds, available),
+                "read": min(policy.read_timeout_seconds, available),
+                "write": min(policy.write_timeout_seconds, available),
+                "pool": min(policy.pool_timeout_seconds, available),
+            }
+
         try:
             with httpx.Client(
-                timeout=httpx.Timeout(35, connect=10),
+                timeout=httpx.Timeout(
+                    connect=min(policy.connect_timeout_seconds, remaining),
+                    read=min(policy.read_timeout_seconds, remaining),
+                    write=min(policy.write_timeout_seconds, remaining),
+                    pool=min(policy.pool_timeout_seconds, remaining),
+                ),
                 follow_redirects=True,
-                headers={"User-Agent": "CivicDataSentinel/0.2 (public data monitor)"},
+                max_redirects=5,
+                event_hooks={"request": [validate_hop]},
+                headers={"User-Agent": "CivicDataSentinel/0.2.4 (public data monitor)"},
             ) as client:
                 with client.stream("GET", url) as response:
-                    response.raise_for_status()
+                    record.update(
+                        http_status=response.status_code,
+                        final_url=str(response.url),
+                        response_headers={
+                            k: v
+                            for k, v in response.headers.items()
+                            if k in {"content-type", "content-length", "date", "last-modified", "etag", "retry-after"}
+                        },
+                    )
                     if response.url.scheme != "https":
-                        raise IngestionError("HTTPS redirect downgraded to an insecure URL")
-                    content = bytearray()
+                        raise IngestionError("HTTPS redirect downgraded to an insecure URL", kind="unsafe_redirect")
+                    retry_after = retry_after_seconds(response.headers.get("retry-after"))
                     for chunk in response.iter_bytes():
                         content.extend(chunk)
+                        if not response.is_success and len(content) >= BODY_LIMIT:
+                            break
                         if len(content) > MAX_BYTES:
-                            raise IngestionError("Downloaded file exceeds the 20 MB safety limit")
+                            raise IngestionError("Downloaded file exceeds the 20 MB safety limit", kind="size_limit")
+                        if audit.remaining() <= 0:
+                            raise IngestionError("Acquisition elapsed budget exceeded", kind="elapsed_budget")
+                    received = True
+                    if not response.is_success:
+                        response.raise_for_status()
+                    if response.status_code == 206:
+                        raise IngestionError(
+                            "Partial HTTP response is not a complete dataset",
+                            kind="incomplete_response",
+                            retryable=True,
+                        )
+                    length = response.headers.get("content-length")
+                    if length and not response.headers.get("content-encoding"):
+                        if not length.isdigit() or int(length) != len(content):
+                            raise IngestionError(
+                                "HTTP Content-Length mismatch", kind="incomplete_response", retryable=True
+                            )
                     if response.headers.get("content-type", "").lower().startswith("text/html"):
-                        raise IngestionError("Server returned HTML instead of a data resource")
+                        raise IngestionError("Server returned HTML instead of a data resource", kind="unexpected_html")
+                    record.update(
+                        outcome="received",
+                        response_bytes=len(content),
+                        response_sha256=hashlib.sha256(content).hexdigest(),
+                    )
+                    audit.last_response = (record, bytes(content))
                     return bytes(content)
-        except httpx.HTTPError as exc:
-            transient = isinstance(exc, httpx.TransportError) or (
-                isinstance(exc, httpx.HTTPStatusError) and exc.response.status_code in {429, 500, 502, 503, 504}
+        except (httpx.HTTPError, IngestionError) as exc:
+            if isinstance(exc, IngestionError):
+                last = exc
+            else:
+                status = record.get("http_status")
+                transient = (
+                    isinstance(exc, httpx.TransportError)
+                    or isinstance(exc, httpx.TimeoutException)
+                    or status in {408, 425, 429, 500, 502, 503, 504}
+                )
+                kind = (
+                    "read_timeout"
+                    if isinstance(exc, httpx.ReadTimeout)
+                    else "connect_timeout"
+                    if isinstance(exc, httpx.ConnectTimeout)
+                    else "timeout"
+                    if isinstance(exc, httpx.TimeoutException)
+                    else "http_status"
+                    if isinstance(exc, httpx.HTTPStatusError)
+                    else "transport"
+                )
+                last = IngestionError(
+                    f"Download failed after {attempt} attempt(s): {exc.__class__.__name__}"
+                    + (f" (HTTP {status})" if isinstance(exc, httpx.HTTPStatusError) else ""),
+                    kind=kind,
+                    retryable=transient,
+                )
+            record.update(
+                outcome="failed", error_kind=last.kind, exception_class=exc.__class__.__name__, retryable=last.retryable
             )
-            if transient and attempt < 2:
-                time.sleep(0.5 * (2**attempt))
-                continue
-            raise IngestionError(f"Download failed after {attempt + 1} attempt(s): {exc.__class__.__name__}") from exc
-    raise IngestionError("Retry budget exhausted")
+            if content or received:
+                # Error responses can be truncated intentionally. Hashes describe the retained prefix.
+                audit.capture(record, content, complete=received and len(content) < BODY_LIMIT)
+            if not last.retryable or attempt == policy.max_attempts:
+                break
+            delay = random.uniform(
+                0, min(policy.backoff_max_seconds, policy.backoff_initial_seconds * 2 ** (attempt - 1))
+            )
+            if retry_after is not None:
+                record["retry_after_seconds"] = retry_after
+                if retry_after > policy.max_retry_after_seconds:
+                    record["retry_stop_reason"] = "retry_after_exceeds_policy"
+                    break
+                delay = max(delay, retry_after)
+            if delay >= audit.remaining():
+                record["retry_stop_reason"] = "elapsed_budget"
+                break
+            record["retry_delay_seconds"] = round(delay, 3)
+            time.sleep(delay)
+        finally:
+            record["elapsed_seconds"] = round(time.monotonic() - started, 3)
+            LOG.info("acquisition_attempt", extra={"dataset_id": audit.dataset_id, "request": dict(record)})
+    if last is None:
+        last = IngestionError("Acquisition elapsed budget exhausted", kind="elapsed_budget")
+    raise last.attach(audit)
 
 
 def _get_ckan_page(api_url: str, *, resource_id: str, limit: int, offset: int) -> dict:
@@ -63,7 +184,7 @@ def _get_ckan_page(api_url: str, *, resource_id: str, limit: int, offset: int) -
         )
         payload = json.loads(_get_bytes(endpoint + "?" + query))
         if not isinstance(payload, dict) or payload.get("success") is not True:
-            raise IngestionError("CKAN datastore_search did not report success")
+            raise IngestionError("CKAN datastore_search did not report success", kind="provider_error")
         data = payload.get("result")
         if not isinstance(data, dict) or not isinstance(data.get("records"), list):
             raise IngestionError("Malformed CKAN DataStore response")
@@ -178,12 +299,63 @@ def _fetch_ckan_datastore(source: dict) -> tuple[bytes, dict]:
 
 
 def fetch_csv(cfg: dict) -> tuple[bytes, dict]:
+    audit = AcquisitionAudit(AcquisitionPolicy.model_validate(cfg.get("acquisition") or {}), cfg.get("dataset_id", ""))
+    token = CURRENT_AUDIT.set(audit)
+    try:
+        content, meta = _fetch_csv(cfg)
+        meta["acquisition"] = audit.summary()
+        meta["_source_documents"] = list(meta.get("_source_documents", [])) + [
+            ("acquisition_error_body", raw) for _, raw in audit.bodies
+        ]
+        return content, meta
+    except IngestionError as exc:
+        cause = exc.__cause__
+        if isinstance(cause, IngestionError):
+            exc.kind, exc.retryable, exc.diagnostics = cause.kind, cause.retryable, cause.diagnostics
+        if not exc.diagnostics and audit.last_response:
+            record, raw = audit.last_response
+            record["validation_error"] = exc.kind
+            audit.capture(record, raw, complete=True)
+        exc.attach(audit)
+        raise
+    finally:
+        CURRENT_AUDIT.reset(token)
+
+
+def _fetch_csv(cfg: dict) -> tuple[bytes, dict]:
     source = cfg["source"]
     metadata = {"source_url": None, "source_last_modified": None, "metadata_status": "unavailable"}
     if source.get("type") == "json":
         return _fetch_json(source)
     if source.get("type") == "ckan_datastore":
-        return _fetch_ckan_datastore(source)
+        try:
+            return _fetch_ckan_datastore(source)
+        except IngestionError as exc:
+            alternative = (cfg.get("acquisition") or {}).get("ckan_resource_fallback_api_url")
+            attempted = exc.diagnostics.get("attempts", [])
+            retired_endpoint = (
+                exc.kind == "http_status" and attempted and attempted[-1].get("http_status") in {404, 410}
+            )
+            if not alternative or not (retired_endpoint or exc.kind == "provider_error"):
+                raise
+            if exc.kind == "provider_error" and (audit := CURRENT_AUDIT.get()) and audit.last_response:
+                record, raw = audit.last_response
+                record["validation_error"] = exc.kind
+                audit.capture(record, raw, complete=True)
+            content, meta = _fetch_csv(
+                {
+                    **cfg,
+                    "source": {**source, "type": "ckan_resource", "api_url": alternative, "fallback_url": None},
+                    "_require_inactive_same_resource": True,
+                }
+            )
+            meta["distribution_fallback"] = {
+                "reason": str(exc),
+                "failure_kind": exc.kind,
+                "resource_id": source["resource_id"],
+                "gate": "same CKAN resource id; datastore_active=false; normal schema/quality/trust checks still required",
+            }
+            return content, meta
     if source.get("type", "url") == "url":
         url = source["url"]
     else:
@@ -198,6 +370,15 @@ def fetch_csv(cfg: dict) -> tuple[bytes, dict]:
                 raise IngestionError("CKAN resource_show reported failure")
             metadata["_source_documents"] = [("resource_metadata", raw_metadata)]
             resource = payload.get("result", {})
+            if cfg.get("_require_inactive_same_resource") and (
+                resource.get("id") != source["resource_id"] or resource.get("datastore_active") is not False
+            ):
+                raise IngestionError(
+                    "CSV fallback requires the same resource with an explicitly inactive DataStore",
+                    kind="fallback_not_authorized",
+                )
+            metadata["resource_id"] = source["resource_id"]
+            metadata["source_format"] = "ckan_resource_csv"
             url = resource.get("url")
             if not url or not urlparse(url).scheme == "https":
                 raise IngestionError("CKAN resource has no HTTPS download URL")
@@ -206,7 +387,7 @@ def fetch_csv(cfg: dict) -> tuple[bytes, dict]:
         except (httpx.HTTPError, ValueError, KeyError, TypeError, IngestionError) as exc:
             fallback = source.get("fallback_url")
             if not fallback:
-                raise IngestionError(f"CKAN discovery failed: {exc.__class__.__name__}") from exc
+                raise IngestionError(f"CKAN discovery failed: {exc}") from exc
             url = fallback
             metadata["metadata_status"] = "discovery_failed_fallback_used"
     metadata["source_url"] = url
@@ -274,7 +455,7 @@ def _json_path(payload, path):
         return payload
     for name in path.split("."):
         if not isinstance(payload, dict) or name not in payload:
-            raise IngestionError("JSON records/total path is missing")
+            raise IngestionError(f"JSON records/total path is missing: {path}", kind="json_schema")
         payload = payload[name]
     return payload
 
@@ -297,7 +478,14 @@ def _fetch_json(source):
         try:
             payload = json.loads(raw)
         except ValueError as exc:
-            raise IngestionError("Malformed JSON response") from exc
+            raise IngestionError("Malformed JSON response", kind="malformed_json") from exc
+        if isinstance(payload, dict) and (
+            payload.get("success") is False
+            or payload.get("error")
+            or payload.get("errors")
+            or str(payload.get("status", "")).lower() in {"error", "failed", "failure"}
+        ):
+            raise IngestionError("Provider returned a JSON error envelope; no dataset accepted", kind="provider_error")
         batch = _json_path(payload, source.get("records_path", "records"))
         if not isinstance(batch, list) or not batch:
             raise IngestionError("JSON records must be a nonempty list")

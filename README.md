@@ -2,13 +2,19 @@
 
 [![Quality gates](https://github.com/GerardoLauro/CivicData-Sentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/GerardoLauro/CivicData-Sentinel/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.2.3--beta-orange.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.2.4--beta-orange.svg)](CHANGELOG.md)
 
 **Explainable monitoring and replayable evidence for public datasets.**
 
 Public feeds can change structure, publish partial snapshots or silently revise
 records. CivicData Sentinel separates acquisition failures, meaningful changes
 and quality findings, keeping an auditable trusted baseline.
+
+> **Operational notice — 10 November 2026:** the official real-time air API is
+> unavailable in reproduced checks. Monitoring retains the failure and trusted
+> baseline; this release does not claim an upstream repair. Fountains can use the
+> verified official CSV of the same inactive DataStore resource, with an explicit
+> warning. See the [incident report](docs/incident-v0.2.4.md) and release notes.
 
 ## Features
 

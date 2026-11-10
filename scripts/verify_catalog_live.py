@@ -52,6 +52,10 @@ def verify(configs, output):
         first = run(path, db, output=output / (cfg["dataset_id"] + "-first.json"))
         if first["status"] != "success":
             raise RuntimeError(f"{cfg['dataset_id']}: live run rejected; inspect saved report")
+        if first["source"].get("distribution_fallback"):
+            raise RuntimeError(
+                f"{cfg['dataset_id']}: primary format unavailable; CSV fallback cannot also be claimed as an independent format"
+            )
         raw, expected, fields, meta = reference(cfg)
         artifact = cfg["dataset_id"] + "-reference.bin"
         (output / artifact).write_bytes(raw)

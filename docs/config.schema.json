@@ -1,5 +1,87 @@
 {
   "$defs": {
+    "AcquisitionPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "ckan_resource_fallback_api_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ckan Resource Fallback Api Url"
+        },
+        "max_attempts": {
+          "default": 3,
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Max Attempts",
+          "type": "integer"
+        },
+        "connect_timeout_seconds": {
+          "default": 10,
+          "exclusiveMinimum": 0,
+          "maximum": 60,
+          "title": "Connect Timeout Seconds",
+          "type": "number"
+        },
+        "read_timeout_seconds": {
+          "default": 35,
+          "exclusiveMinimum": 0,
+          "maximum": 180,
+          "title": "Read Timeout Seconds",
+          "type": "number"
+        },
+        "write_timeout_seconds": {
+          "default": 10,
+          "exclusiveMinimum": 0,
+          "maximum": 60,
+          "title": "Write Timeout Seconds",
+          "type": "number"
+        },
+        "pool_timeout_seconds": {
+          "default": 10,
+          "exclusiveMinimum": 0,
+          "maximum": 60,
+          "title": "Pool Timeout Seconds",
+          "type": "number"
+        },
+        "max_elapsed_seconds": {
+          "default": 180,
+          "exclusiveMinimum": 0,
+          "maximum": 900,
+          "title": "Max Elapsed Seconds",
+          "type": "number"
+        },
+        "backoff_initial_seconds": {
+          "default": 1,
+          "maximum": 30,
+          "minimum": 0,
+          "title": "Backoff Initial Seconds",
+          "type": "number"
+        },
+        "backoff_max_seconds": {
+          "default": 20,
+          "maximum": 60,
+          "minimum": 0,
+          "title": "Backoff Max Seconds",
+          "type": "number"
+        },
+        "max_retry_after_seconds": {
+          "default": 60,
+          "maximum": 300,
+          "minimum": 0,
+          "title": "Max Retry After Seconds",
+          "type": "number"
+        }
+      },
+      "title": "AcquisitionPolicy",
+      "type": "object"
+    },
     "Bounds": {
       "additionalProperties": false,
       "properties": {
@@ -594,6 +676,9 @@
     },
     "source": {
       "$ref": "#/$defs/Source"
+    },
+    "acquisition": {
+      "$ref": "#/$defs/AcquisitionPolicy"
     },
     "encoding": {
       "default": "utf-8-sig",

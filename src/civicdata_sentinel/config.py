@@ -11,6 +11,8 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from .acquisition import AcquisitionPolicy
+
 Severity = Literal["info", "warning", "error", "critical"]
 
 
@@ -166,6 +168,7 @@ class Dataset(ContractModel):
     license: str = ""
     primary_key: str | list[str]
     source: Source
+    acquisition: AcquisitionPolicy = Field(default_factory=AcquisitionPolicy)
     encoding: str = "utf-8-sig"
     delimiter: str | None = None
     required_columns: list[str] = Field(default_factory=list)
@@ -182,6 +185,16 @@ class Dataset(ContractModel):
 
     @model_validator(mode="after")
     def consistent(self):
+        alternative = self.acquisition.ckan_resource_fallback_api_url
+        if alternative:
+            candidate, original = urlparse(alternative), urlparse(self.source.api_url or "")
+            if (
+                self.source.type != "ckan_datastore"
+                or candidate.scheme != "https"
+                or candidate.username
+                or candidate.netloc != original.netloc
+            ):
+                raise ValueError("CKAN fallback must use HTTPS on the same authority for a DataStore contract")
         keys = [self.primary_key] if isinstance(self.primary_key, str) else self.primary_key
         if not keys or any(not k.strip() for k in keys) or len(set(keys)) != len(keys):
             raise ValueError("primary_key must contain distinct nonblank columns")

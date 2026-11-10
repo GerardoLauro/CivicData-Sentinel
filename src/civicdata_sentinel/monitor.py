@@ -65,7 +65,7 @@ def _observe(cfg, db_path, input_file):
         "checked_at": now.isoformat(),
         "status": "failed",
         "accepted": False,
-        "source": {"input_kind": stream},
+        "source": {"input_kind": stream, "source_url": cfg["source"].get("url") or cfg["source"].get("api_url")},
         "digest": None,
         "previous_digest": None,
         "stats": None,
@@ -122,6 +122,15 @@ def _observe(cfg, db_path, input_file):
                 "utf-8" if meta.get("source_format") in {"json", "ckan_datastore_json"} else cfg["encoding"]
             )
             report["source"]["parser_encoding"] = parser_encoding
+            if meta.get("distribution_fallback"):
+                report["issues"].append(
+                    {
+                        "code": "official_distribution_fallback",
+                        "severity": "warning",
+                        "category": "source",
+                        "message": "DataStore acquisition failed; using the declared inactive resource's official CSV. Original failure is retained in acquisition evidence.",
+                    }
+                )
             rows, fields = parse_csv(content, encoding=parser_encoding, delimiter=cfg.get("delimiter"))
             report["source_columns"] = fields
             old_source_fields = prior.get("source_columns", prior.get("columns")) if prior else None
@@ -212,6 +221,10 @@ def _observe(cfg, db_path, input_file):
             report["status"] = "quarantined" if blocked else "success"
             report["accepted"] = not blocked
         except (IngestionError, OSError, ValueError) as exc:
+            if isinstance(exc, IngestionError):
+                documents.extend(exc.documents)
+                report["source"]["acquisition"] = exc.diagnostics
+                report["source"]["failure"] = {"kind": exc.kind, "retryable": exc.retryable}
             records = None
             report["digest"] = None
             report["status"] = "failed"

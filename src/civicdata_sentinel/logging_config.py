@@ -12,7 +12,7 @@ class JSONFormatter(logging.Formatter):
             "level": record.levelname.lower(),
             "event": record.getMessage(),
         }
-        for key in ("dataset_id", "stream", "run_id", "status", "duration_seconds"):
+        for key in ("dataset_id", "stream", "run_id", "status", "duration_seconds", "request"):
             if hasattr(record, key):
                 value[key] = getattr(record, key)
         return json.dumps(value, ensure_ascii=False)

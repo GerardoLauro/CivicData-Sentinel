@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.4-beta — 2026-11-10
+
+- Investigate all 13 scheduled failures; preserve logs, artifacts and baseline history.
+- Add configurable transport timeouts, bounded retries/backoff/Retry-After and structured acquisition evidence, including bounded failed-response bodies.
+- Reject explicit JSON error envelopes, partial HTTP responses and unsafe redirects; never accept failed input as empty data.
+- Recover the same fountains CSV only when the declared DataStore is retired/inactive, preserving identity/comparison and a visible warning.
+- Capture safe GitHub trigger metadata and document measured scheduler gaps without promising an hourly SLA.
+- Add synthetic incident regressions and document the continuing air-provider outage; no arbitrary replacement feed or success claim.
+
 ## 0.2.3-beta — 2026-11-06
 
 - Pin reviewed official Actions v7 commits, group future action updates and bound CI job duration.

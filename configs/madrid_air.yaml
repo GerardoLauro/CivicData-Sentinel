@@ -54,3 +54,12 @@ checks:
 max_interval_hours: 4
 policy:
   quarantine_removed_fraction: 0.5
+
+acquisition:
+  max_attempts: 3
+  connect_timeout_seconds: 10
+  read_timeout_seconds: 60
+  max_elapsed_seconds: 210
+  backoff_initial_seconds: 2
+  backoff_max_seconds: 20
+  max_retry_after_seconds: 60
