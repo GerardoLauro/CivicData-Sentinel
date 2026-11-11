@@ -88,6 +88,16 @@ def test_obsolete_conflicting_docs_cannot_verify(tmp_path):
             verify(journal, state["id"], [p.rules[0].check.id])
 
 
+def test_enum_order_does_not_create_false_conflicts():
+    docs = [
+        document(text.encode(), origin="synthetic", format="txt")
+        for text in ["STATE allowed values: A,B", "STATE allowed values: B,A,A"]
+    ]
+    p = propose(BASE, ROWS, FIELDS, docs, sample_origin="synthetic")
+    assert len(p.rules) == 1 and not p.rules[0].conflict
+    assert p.rules[0].check.id == draft("STATE allowed values: B,A").rules[0].check.id
+
+
 def test_statistics_are_separate_and_no_invented_thresholds():
     p = draft(" ", statistics=True)
     assert p.rules and all(r.basis == "statistical" and r.uncertain and not r.evidence for r in p.rules)

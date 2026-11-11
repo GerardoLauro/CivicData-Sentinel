@@ -126,7 +126,7 @@ hidden or repaired by rewriting historical evidence.
 
 ## Practical value and remaining limits
 
-Final local checks: **164 tests passed**, **93.22% coverage**, Ruff lint and
+Final local checks: **165 tests passed**, **93.27% coverage**, Ruff lint and
 format checks passed, `pip check` passed, wheel/sdist built and passed Twine
 validation. `pip-audit --skip-editable` found no known vulnerabilities in the
 installed dependency set on 11 November (a point-in-time database check, not a

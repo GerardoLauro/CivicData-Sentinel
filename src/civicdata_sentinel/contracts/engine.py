@@ -15,6 +15,8 @@ from .models import Citation, Proposal, Rule
 
 def rule_id(check, prefix="proposal"):
     identity = {k: v for k, v in check.items() if k not in {"id", "severity"}}
+    if identity.get("kind") == "domain":
+        identity["values"] = sorted(set(identity["values"]))
     return prefix + "-" + hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()[:12]
 
 

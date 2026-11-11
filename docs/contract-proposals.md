@@ -94,6 +94,8 @@ but field names/types alone do not justify normative rules. Negation, examples,
 modal language and wrapped enumerations cause abstention. Old dates produce
 review warnings, not an assertion that the document is invalid. Contradictory
 proposals cannot be verified until the reviewer resolves them in a revision.
+Equivalent domains listed in different orders share one rule identity and do
+not produce a false conflict.
 This is a small pattern-based extractor, not general natural-language understanding.
 
 Sample verification uses the **existing** normalization and quality evaluators.
