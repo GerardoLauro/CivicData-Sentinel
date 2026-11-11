@@ -6,3 +6,7 @@
 *.sqlite binary
 *.bin binary
 evidence/** -text
+# Retained official captures are hashed as bytes; never normalize their newlines.
+examples/contracts/fountains/* -text -whitespace
+examples/contracts/parking/* -text -whitespace
+docs/standards/table-schema-v1.json -text

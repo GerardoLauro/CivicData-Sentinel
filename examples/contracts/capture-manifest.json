@@ -1,0 +1,287 @@
+{
+  "captured_at": "2026-11-11T10:52:43.874104+00:00",
+  "datasets": {
+    "madrid_fountains": {
+      "documentation_url": "https://datos.madrid.es/dataset/300051-0-fuentes/resource/300051-25-fuentes/download/estructura20datos20fuentes20de20agua20para20beber.pdf",
+      "sample_url": "https://datos.madrid.es/id/api/3/action/datastore_search?resource_id=300051-26-fuentes",
+      "html_url": "https://datos.madrid.es/dataset/300051-0-fuentes",
+      "json_url": "https://datos.madrid.es/api/3/action/package_show?id=300051-0-fuentes",
+      "sample_metadata": {
+        "source_url": "https://datos.madrid.es/id/api/3/action/datastore_search?resource_id=300051-26-fuentes",
+        "source_last_modified": null,
+        "metadata_status": "not_provided_by_datastore",
+        "source_format": "ckan_datastore_json",
+        "resource_id": "300051-26-fuentes",
+        "total_rows": 2313,
+        "data_pages": 5,
+        "consistency_requests": 1,
+        "sort": "_id asc",
+        "consistency": "first_page_rechecked; not_transactional",
+        "_source_documents": [
+          [
+            "ckan_result",
+            {
+              "bytes": 320559,
+              "sha256": "fe41296b7a7d5292f745b808c01dbe7d5acc558b98bbb41d318c59c09ca77a4e"
+            }
+          ],
+          [
+            "ckan_result",
+            {
+              "bytes": 317580,
+              "sha256": "8c5169d068cc619cb017100bbcf23de69a73324e1977580fb69480f9178d1b98"
+            }
+          ],
+          [
+            "ckan_result",
+            {
+              "bytes": 325256,
+              "sha256": "ae248df3a8afba5c1ecf8bc538e7b8111dec6fb23c42207a494272759803b69e"
+            }
+          ],
+          [
+            "ckan_result",
+            {
+              "bytes": 324920,
+              "sha256": "9116b68a1540e4473cce931967554764e2634e6384c4345011c49bd444ee21a9"
+            }
+          ],
+          [
+            "ckan_result",
+            {
+              "bytes": 201525,
+              "sha256": "d19baed62f7e4a357c558c65b4d36f2c948691a3f70ccfe644b3e8443bc1c3dc"
+            }
+          ]
+        ],
+        "acquisition": {
+          "policy": {
+            "ckan_resource_fallback_api_url": "https://datos.madrid.es/api/3/action",
+            "max_attempts": 2,
+            "connect_timeout_seconds": 10.0,
+            "read_timeout_seconds": 15.0,
+            "write_timeout_seconds": 10.0,
+            "pool_timeout_seconds": 10.0,
+            "max_elapsed_seconds": 90.0,
+            "backoff_initial_seconds": 1.0,
+            "backoff_max_seconds": 20.0,
+            "max_retry_after_seconds": 60.0
+          },
+          "elapsed_seconds": 4.297,
+          "attempts": [
+            {
+              "url": "https://datos.madrid.es/id/api/3/action/datastore_search?resource_id=300051-26-fuentes&limit=500&offset=0&sort=_id+asc&include_total=true",
+              "attempt": 1,
+              "http_status": 200,
+              "final_url": "https://datos.madrid.es/id/api/3/action/datastore_search?resource_id=300051-26-fuentes&limit=500&offset=0&sort=_id+asc&include_total=true",
+              "response_headers": {
+                "content-type": "application/json;charset=utf-8",
+                "date": "Wed, 11 Nov 2026 10:44:31 GMT"
+              },
+              "outcome": "received",
+              "response_bytes": 295672,
+              "response_sha256": "ea67ff812a8b69ff101783435422339d7bf4f45ba92e1f202a9f330b65f54af0",
+              "elapsed_seconds": 0.813
+            },
+            {
+              "url": "https://datos.madrid.es/id/api/3/action/datastore_search?resource_id=300051-26-fuentes&limit=500&offset=500&sort=_id+asc&include_total=true",
+              "attempt": 1,
+              "http_status": 200,
+              "final_url": "https://datos.madrid.es/id/api/3/action/datastore_search?resource_id=300051-26-fuentes&limit=500&offset=500&sort=_id+asc&include_total=true",
+              "response_headers": {
+                "content-type": "application/json;charset=utf-8",
+                "date": "Wed, 11 Nov 2026 10:44:32 GMT",
+                "content-length": "39736"
+              },
+              "outcome": "received",
+              "response_bytes": 292693,
+              "response_sha256": "02942b407b84f8af35da2216fc2a8fd03179f361eb6997c7d7dafea01ba90cfe",
+              "elapsed_seconds": 0.656
+            },
+            {
+              "url": "https://datos.madrid.es/id/api/3/action/datastore_search?resource_id=300051-26-fuentes&limit=500&offset=1000&sort=_id+asc&include_total=true",
+              "attempt": 1,
+              "http_status": 200,
+              "final_url": "https://datos.madrid.es/id/api/3/action/datastore_search?resource_id=300051-26-fuentes&limit=500&offset=1000&sort=_id+asc&include_total=true",
+              "response_headers": {
+                "content-type": "application/json;charset=utf-8",
+                "date": "Wed, 11 Nov 2026 10:44:33 GMT",
+                "content-length": "40581"
+              },
+              "outcome": "received",
+              "response_bytes": 300369,
+              "response_sha256": "1cd34a924b583d3b685d343672d711fe497b4d5c419f7b0da1a05068ac0bb91d",
+              "elapsed_seconds": 0.484
+            },
+            {
+              "url": "https://datos.madrid.es/id/api/3/action/datastore_search?resource_id=300051-26-fuentes&limit=500&offset=1500&sort=_id+asc&include_total=true",
+              "attempt": 1,
+              "http_status": 200,
+              "final_url": "https://datos.madrid.es/id/api/3/action/datastore_search?resource_id=300051-26-fuentes&limit=500&offset=1500&sort=_id+asc&include_total=true",
+              "response_headers": {
+                "content-type": "application/json;charset=utf-8",
+                "date": "Wed, 11 Nov 2026 10:44:33 GMT",
+                "content-length": "38434"
+              },
+              "outcome": "received",
+              "response_bytes": 300033,
+              "response_sha256": "8e021ebe7bb189ad7c57a72eba61c0404d764dd5085d7e36b4fb200cf27d2c73",
+              "elapsed_seconds": 0.75
+            },
+            {
+              "url": "https://datos.madrid.es/id/api/3/action/datastore_search?resource_id=300051-26-fuentes&limit=500&offset=2000&sort=_id+asc&include_total=true",
+              "attempt": 1,
+              "http_status": 200,
+              "final_url": "https://datos.madrid.es/id/api/3/action/datastore_search?resource_id=300051-26-fuentes&limit=500&offset=2000&sort=_id+asc&include_total=true",
+              "response_headers": {
+                "content-type": "application/json;charset=utf-8",
+                "date": "Wed, 11 Nov 2026 10:44:34 GMT",
+                "content-length": "24669"
+              },
+              "outcome": "received",
+              "response_bytes": 185988,
+              "response_sha256": "bb458136d9b2038e44bdea14037f4c7bed5db25136adda2a50385cf68469966e",
+              "elapsed_seconds": 0.641
+            },
+            {
+              "url": "https://datos.madrid.es/id/api/3/action/datastore_search?resource_id=300051-26-fuentes&limit=500&offset=0&sort=_id+asc&include_total=true",
+              "attempt": 1,
+              "http_status": 200,
+              "final_url": "https://datos.madrid.es/id/api/3/action/datastore_search?resource_id=300051-26-fuentes&limit=500&offset=0&sort=_id+asc&include_total=true",
+              "response_headers": {
+                "content-type": "application/json;charset=utf-8",
+                "date": "Wed, 11 Nov 2026 10:44:35 GMT"
+              },
+              "outcome": "received",
+              "response_bytes": 295672,
+              "response_sha256": "ea67ff812a8b69ff101783435422339d7bf4f45ba92e1f202a9f330b65f54af0",
+              "elapsed_seconds": 0.781
+            }
+          ],
+          "diagnostic_body_limit_bytes": 65536,
+          "diagnostic_body_limit_count": 8
+        },
+        "body_sha256": "6fad6a6387921997a7af94be28308ec80e86f8010d289ee890cb34a5ce8f5457",
+        "rows": 2313
+      }
+    },
+    "madrid_parking": {
+      "documentation_url": "https://datos.madrid.es/dataset/202625-0-aparcamientos-publicos/resource/202625-2-aparcamientos-publicos/download/estructura_ds_conjuntodatos.pdf",
+      "sample_url": "https://datos.madrid.es/dataset/202625-0-aparcamientos-publicos/resource/202625-3-aparcamientos-publicos-csv/download/202625-0-aparcamientos-publicos.csv",
+      "html_url": "https://datos.madrid.es/dataset/202625-0-aparcamientos-publicos",
+      "json_url": "https://datos.madrid.es/api/3/action/package_show?id=202625-0-aparcamientos-publicos",
+      "sample_metadata": {
+        "source_url": "https://datos.madrid.es/dataset/202625-0-aparcamientos-publicos/resource/202625-3-aparcamientos-publicos-csv/download/202625-0-aparcamientos-publicos.csv",
+        "source_last_modified": "2026-11-10T19:39:10.013724",
+        "metadata_status": "available",
+        "_source_documents": [
+          [
+            "resource_metadata",
+            {
+              "bytes": 1910,
+              "sha256": "eda081a6d5e60fb23addf61015953edeb68f575489bb67710fee8e4a44d5b6b4"
+            }
+          ]
+        ],
+        "resource_id": "202625-3-aparcamientos-publicos-csv",
+        "source_format": "ckan_resource_csv",
+        "acquisition": {
+          "policy": {
+            "ckan_resource_fallback_api_url": null,
+            "max_attempts": 3,
+            "connect_timeout_seconds": 10.0,
+            "read_timeout_seconds": 35.0,
+            "write_timeout_seconds": 10.0,
+            "pool_timeout_seconds": 10.0,
+            "max_elapsed_seconds": 180.0,
+            "backoff_initial_seconds": 1.0,
+            "backoff_max_seconds": 20.0,
+            "max_retry_after_seconds": 60.0
+          },
+          "elapsed_seconds": 1.312,
+          "attempts": [
+            {
+              "url": "https://datos.madrid.es/api/3/action/resource_show?id=202625-3-aparcamientos-publicos-csv",
+              "attempt": 1,
+              "http_status": 200,
+              "final_url": "https://datos.madrid.es/api/3/action/resource_show?id=202625-3-aparcamientos-publicos-csv",
+              "response_headers": {
+                "content-type": "application/json;charset=utf-8",
+                "date": "Wed, 11 Nov 2026 10:44:36 GMT",
+                "content-length": "764"
+              },
+              "outcome": "received",
+              "response_bytes": 1910,
+              "response_sha256": "eda081a6d5e60fb23addf61015953edeb68f575489bb67710fee8e4a44d5b6b4",
+              "elapsed_seconds": 0.547
+            },
+            {
+              "url": "https://datos.madrid.es/dataset/202625-0-aparcamientos-publicos/resource/202625-3-aparcamientos-publicos-csv/download/202625-0-aparcamientos-publicos.csv",
+              "attempt": 1,
+              "http_status": 200,
+              "final_url": "https://datos.madrid.es/dataset/202625-0-aparcamientos-publicos/resource/202625-3-aparcamientos-publicos-csv/download/202625-0-aparcamientos-publicos.csv",
+              "response_headers": {
+                "content-type": "text/csv; charset=utf-8",
+                "last-modified": "Tue, 10 Nov 2026 19:39:10 GMT",
+                "etag": "\"1794339550.3151028-39991-2260735342\"",
+                "date": "Wed, 11 Nov 2026 10:44:36 GMT",
+                "content-length": "7807"
+              },
+              "outcome": "received",
+              "response_bytes": 39991,
+              "response_sha256": "fa2a387387d4cb5a1f521f2ce22b186ef0d8898bfe7ea53e4cab3fee813cbcd4",
+              "elapsed_seconds": 0.765
+            }
+          ],
+          "diagnostic_body_limit_bytes": 65536,
+          "diagnostic_body_limit_count": 8
+        },
+        "body_sha256": "fa2a387387d4cb5a1f521f2ce22b186ef0d8898bfe7ea53e4cab3fee813cbcd4",
+        "rows": 63
+      }
+    }
+  },
+  "files": [
+    {
+      "path": "fountains/catalog.html",
+      "bytes": 52015,
+      "sha256": "514c6934c7666254e55e2d266839b385ff53c2f8a931b419b83b429fa7914c70"
+    },
+    {
+      "path": "fountains/documentation.pdf",
+      "bytes": 82051,
+      "sha256": "8f6a00f22cfed0544588db5a210d69a50a2f30cea10dd45dedfdc90b739bdd2c"
+    },
+    {
+      "path": "fountains/metadata.json",
+      "bytes": 45450,
+      "sha256": "8b0887b61a0721bd6a48097e6d620e0a819aaece7950e523a0d962d569a69c77"
+    },
+    {
+      "path": "fountains/sample.csv",
+      "bytes": 545401,
+      "sha256": "6fad6a6387921997a7af94be28308ec80e86f8010d289ee890cb34a5ce8f5457"
+    },
+    {
+      "path": "parking/catalog.html",
+      "bytes": 38674,
+      "sha256": "ac3075cdab0f7680d969bc82c39f864cff1af60572f329c18c6b2b1e65fc76d3"
+    },
+    {
+      "path": "parking/documentation.pdf",
+      "bytes": 90426,
+      "sha256": "5bee16d6105f5d792de2c42ab540c5fc11e13657296282bde71f831b4f7c0b78"
+    },
+    {
+      "path": "parking/metadata.json",
+      "bytes": 13329,
+      "sha256": "ff361b1db1f90e898e1a678a24cda26c9651de0c998d3cea381991f2f4575125"
+    },
+    {
+      "path": "parking/sample.csv",
+      "bytes": 39991,
+      "sha256": "fa2a387387d4cb5a1f521f2ce22b186ef0d8898bfe7ea53e4cab3fee813cbcd4"
+    }
+  ],
+  "license": "CC BY 4.0, Ayuntamiento de Madrid. Original public resources; no local operational history included."
+}

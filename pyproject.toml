@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "civicdata-sentinel"
-version = "0.2.4b0"
+version = "0.3.0b0"
 description = "Lightweight, explainable monitoring for public CSV datasets"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -14,8 +14,9 @@ authors = [{name = "CivicData Sentinel contributors"}]
 dependencies = ["httpx>=0.25,<1", "PyYAML>=6,<7", "pydantic>=2.9,<3", "filelock>=4.2.1,<5", "tzdata>=2024.1"]
 
 [project.optional-dependencies]
+contracts = ["pypdf>=6,<7"]
 dashboard = ["streamlit>=1.50,<2"]
-test = ["pytest>=8,<10", "pytest-cov>=6,<8", "hypothesis>=6,<7"]
+test = ["pytest>=8,<10", "pytest-cov>=6,<8", "hypothesis>=6,<7", "jsonschema>=4.23,<5", "pypdf>=6,<7"]
 dev = ["ruff>=0.9,<1", "pip-audit>=2.9,<3", "build>=1.2,<2"]
 
 [project.scripts]
