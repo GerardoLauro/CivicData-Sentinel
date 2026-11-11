@@ -1,0 +1,14 @@
+{
+  "status": "human_confirmed",
+  "reviewer": "Gerardo Lauro (user confirmation in the development conversation)",
+  "review_date": "2026-11-11",
+  "scope": "Documentary meaning only; not current applicability, independent municipal verification, or production approval.",
+  "method": "Five documentary statements were transcribed from retained official PDFs and explicitly confirmed by the user. Wrapped enumerations were read manually. PK campo clave is interpreted as a uniqueness constraint, not a newly inferred primary key. The parking document is generic and dated May 2019.",
+  "rules": [
+    {"dataset_id": "madrid_fountains", "kind": "domain", "column": "UBICACION", "values": ["ZV", "VP"]},
+    {"dataset_id": "madrid_fountains", "kind": "domain", "column": "ESTADO", "values": ["OPERATIVO", "NO OPERATIVO", "CERRADA TEMPORALMENTE"]},
+    {"dataset_id": "madrid_fountains", "kind": "domain", "column": "USO", "values": ["PERSONAS", "MASCOTAS", "PERSONAS_Y_MASCOTAS"]},
+    {"dataset_id": "madrid_parking", "kind": "unique", "column": "PK"},
+    {"dataset_id": "madrid_parking", "kind": "domain", "column": "ACCESIBILIDAD", "values": ["0", "1", "2", "3", "4", "5", "6"]}
+  ]
+}

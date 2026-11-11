@@ -22,6 +22,11 @@ h1 {letter-spacing:-0.04em;} [data-testid="stSidebar"] {border-right:1px solid #
     unsafe_allow_html=True,
 )
 st.caption(f"CIVICDATA SENTINEL  /  PUBLIC DATA RELIABILITY  /  {__version__}")
+if st.sidebar.radio("Workspace", ["Observatory", "Contract proposals"]) == "Contract proposals":
+    from civicdata_sentinel.contracts.ui import render
+
+    render()
+    st.stop()
 st.title("Dataset observatory")
 st.write("Follow the evidence behind public data: availability, quality and meaningful change.")
 

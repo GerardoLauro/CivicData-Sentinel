@@ -27,7 +27,7 @@ LOG = logging.getLogger("civicdata_sentinel")
 MAX_BYTES = 20_000_000
 
 
-def _get_bytes(url: str) -> bytes:
+def _get_bytes(url: str, *, allow_html: bool = False) -> bytes:
     parsed = urlparse(url)
     if parsed.scheme != "https" or not parsed.netloc or parsed.username:
         raise IngestionError("Only HTTPS source URLs without credentials are accepted", kind="unsafe_url")
@@ -107,7 +107,7 @@ def _get_bytes(url: str) -> bytes:
                             raise IngestionError(
                                 "HTTP Content-Length mismatch", kind="incomplete_response", retryable=True
                             )
-                    if response.headers.get("content-type", "").lower().startswith("text/html"):
+                    if not allow_html and response.headers.get("content-type", "").lower().startswith("text/html"):
                         raise IngestionError("Server returned HTML instead of a data resource", kind="unexpected_html")
                     record.update(
                         outcome="received",

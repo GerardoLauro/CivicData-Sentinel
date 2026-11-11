@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0-beta — 2026-11-11
+
+- Add an isolated documentation-to-contract proposal engine with retained PDF/HTML/JSON/text evidence, strict typed rules, exact citations and conservative abstention.
+- Add separate hash-chained proposal SQLite journal, revisions, static/sample verification, policy comparison, named review decisions and create-only approved YAML exports. No automatic production activation or historical baseline mutation.
+- Integrate proposal generation, editing, verification, review and export into CLI and a separate Streamlit workspace.
+- Add optional consent-based Ollama semantic suggestions with mock-tested safety limits; deterministic operation remains model-free.
+- Export the faithful Frictionless Table Schema subset with machine-readable semantic omissions; document ODCS evaluation without replacing the monitoring core.
+- Retain actual Madrid fountains/parking examples and a five-statement, user-confirmed documentary benchmark: three supported proposals, two abstentions; no production approvals.
+- Experimentally compare accumulated-air JSON/CSV with the recovered current-day source. Preserve the current contract because full-window DST ambiguity prevents drop-in adoption.
+- Preserve prior monitoring tests, Git history, operational evidence and tags; add regression and end-to-end coverage for the proposal workflow. This remains an experimental beta.
+
 ## 0.2.4-beta — 2026-11-10
 
 - Investigate all 13 scheduled failures; preserve logs, artifacts and baseline history.

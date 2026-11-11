@@ -2,19 +2,21 @@
 
 [![Quality gates](https://github.com/GerardoLauro/CivicData-Sentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/GerardoLauro/CivicData-Sentinel/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.2.4--beta-orange.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.3.0--beta-orange.svg)](CHANGELOG.md)
 
-**Explainable monitoring and replayable evidence for public datasets.**
+**Explainable public-data monitoring and evidence-backed contract proposals.**
 
 Public feeds can change structure, publish partial snapshots or silently revise
 records. CivicData Sentinel separates acquisition failures, meaningful changes
 and quality findings, keeping an auditable trusted baseline.
 
-> **Operational notice — 10 November 2026:** the official real-time air API is
-> unavailable in reproduced checks. Monitoring retains the failure and trusted
-> baseline; this release does not claim an upstream repair. Fountains can use the
-> verified official CSV of the same inactive DataStore resource, with an explicit
-> warning. See the [incident report](docs/incident-v0.2.4.md) and release notes.
+> **Experimental beta — 11 November 2026:** the new document-to-contract workspace
+> proposes checks with citations, sample impact and explicit human approval.
+> No generated production rule is automatically activated. Today's independent
+> air/DataStore checks succeeded; availability remains external and earlier
+> outages remain preserved. The accumulated-air feed was investigated without
+> replacing the baseline. See the [evaluation](docs/evaluation-v0.3.0.md) and
+> preserved [incident report](docs/incident-v0.2.4.md).
 
 ## Features
 
@@ -25,7 +27,9 @@ and quality findings, keeping an auditable trusted baseline.
 - Quarantine and reviewed approval: suspicious publications cannot silently replace trust.
 - Full events, compressed input artifacts, SHA-256 integrity and offline semantic replay.
 - Deduplicated incident lifecycle and cursor-based outbox; no external messages by default.
-- Read-only Streamlit dashboard with dataset/date/severity filters and complete exports.
+- Streamlit observatory with dataset/date/severity filters and complete exports.
+- Separate document-to-contract workspace: PDF/HTML/metadata evidence, conservative extraction, sample verification, review revisions and create-only approved YAML exports.
+- Optional, consent-based Ollama suggestions; deterministic operation needs no model or credentials.
 - Hourly monitoring with portable state persisted separately from source commits.
 
 ![Local dashboard showing observed Madrid data on 6 November 2026](docs/assets/dashboard-overview.png)
@@ -42,7 +46,8 @@ HTTPS feed -> bounded acquisition -> parse/normalize -> structural gate
 ```
 
 Python 3.11+, HTTPX, PyYAML, Pydantic, filelock, SQLite and Streamlit.
-The engine is deterministic and independent of CivicWater; no AI service is needed.
+The monitoring engine is deterministic and independent of CivicWater; no AI service is needed.
+The opt-in proposal workspace uses its own SQLite journal and cannot promote monitoring baselines.
 
 ## Installation and quick start
 
@@ -52,7 +57,7 @@ From the repository root:
 python -m venv .venv
 # Linux/macOS: source .venv/bin/activate
 # Windows PowerShell: .venv/Scripts/Activate.ps1
-python -m pip install -e '.[test,dashboard,dev]'
+python -m pip install -e '.[test,dashboard,dev,contracts]'
 sentinel catalog
 sentinel run-all
 streamlit run dashboard/app.py
@@ -74,6 +79,21 @@ facilities and 126 air rows expanded into 3,024 hourly slots. These are historic
 observations, not promises of current source availability or environmental safety.
 
 ## CLI
+
+To reproduce real documentation-to-contract examples offline:
+
+```bash
+python scripts/contract_examples.py
+sentinel proposal list --proposal-db state/example-proposals.sqlite
+```
+
+The small human-confirmed documentary benchmark yields 3/3 supported proposals,
+3/5 coverage and two abstentions. These are five selected statements, not a
+general accuracy claim. The proposed fountains location rule exposes nine
+sample failures; all real proposals remain pending. Open **Contract proposals**
+in the dashboard or follow the [generation/review guide](docs/contract-proposals.md).
+
+Existing monitoring operations:
 
 ```bash
 sentinel run --config configs/madrid_air.yaml

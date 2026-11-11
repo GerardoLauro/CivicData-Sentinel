@@ -9,10 +9,14 @@ import sys
 from pathlib import Path
 
 from filelock import FileLock, Timeout
+from httpx import HTTPError
 
 from . import __version__
+from .acquisition import IngestionError
 from .comparison import semantic_diff
 from .config import Dataset, catalog
+from .contracts.cli import add_parser as add_proposal_parser
+from .contracts.cli import execute as execute_proposal
 from .exporting import event_csv, report_export
 from .logging_config import configure
 from .monitor import RANK, atomic_json, run, run_catalog
@@ -72,8 +76,9 @@ def parser():
     sub.add_parser("migrate", help="Additively upgrade an existing 0.1 database; back it up first")
     snapshot = sub.add_parser("backup", help="Create a consistent portable SQLite backup")
     snapshot.add_argument("--output", required=True)
+    add_proposal_parser(sub)
     for name, item in sub.choices.items():
-        if name not in {"catalog", "config-schema"}:
+        if name not in {"catalog", "config-schema", "proposal"}:
             item.add_argument("--db", default="state/sentinel.sqlite")
     return main
 
@@ -83,7 +88,9 @@ def main(argv=None):
     configure()
     code = 0
     try:
-        if args.command == "catalog":
+        if args.command == "proposal":
+            value = execute_proposal(args)
+        elif args.command == "catalog":
             value = [
                 {"path": str(p), "dataset_id": c["dataset_id"], "title": c["title"], "source": c["source"]["type"]}
                 for p, c in catalog(args.configs)
@@ -160,7 +167,7 @@ def main(argv=None):
                     value = {"stats": stats, "events": events, "issues": findings}
         print(json.dumps(value, ensure_ascii=False, indent=2))
         return code
-    except (ValueError, OSError, sqlite3.Error, IntegrityError, Timeout) as exc:
+    except (ValueError, OSError, sqlite3.Error, IntegrityError, Timeout, IngestionError, HTTPError) as exc:
         print(json.dumps({"error": str(exc)}, ensure_ascii=False), file=sys.stderr)
         return 1
 

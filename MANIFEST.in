@@ -2,12 +2,12 @@ include LICENSE README.md CHANGELOG.md AGENTS.md Start-Dashboard.cmd
 recursive-include configs *.yaml
 recursive-include dashboard *.py
 recursive-include scripts *.py
-recursive-include docs *.md *.json
-recursive-include tests *.py *.csv
+recursive-include docs *.md *.json *.txt
+recursive-include tests *.py *.csv *.json *.txt
 recursive-include .github *.yml
 include .streamlit/config.toml
 include evidence/NOTICE.md
 include evidence/README.md
 include CONTRIBUTING.md SECURITY.md
-recursive-include examples *.yaml
+recursive-include examples *.yaml *.json *.txt *.md *.pdf *.csv *.html
 recursive-include docs/assets *.png
