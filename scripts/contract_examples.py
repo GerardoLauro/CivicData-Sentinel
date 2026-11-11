@@ -4,6 +4,8 @@ import argparse
 import json
 from pathlib import Path
 
+import yaml
+
 from civicdata_sentinel.config import load_config
 from civicdata_sentinel.contracts.benchmark import evaluate_reference
 from civicdata_sentinel.contracts.cli import summary
@@ -61,7 +63,8 @@ def reproduce(root, output, db):
             (output / f"{dataset}.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
             (output / f"{dataset}.draft.yaml").write_text(state["verification"]["yaml"], encoding="utf-8")
             (output / f"{dataset}.table-schema.json").write_text(
-                json.dumps(table_schema(cfg), indent=2, ensure_ascii=False), encoding="utf-8"
+                json.dumps(table_schema(yaml.safe_load(state["verification"]["yaml"])), indent=2, ensure_ascii=False),
+                encoding="utf-8",
             )
     metrics = evaluate_reference(proposals, reference)
     (output / "benchmark.json").write_text(json.dumps(metrics, indent=2, ensure_ascii=False), encoding="utf-8")

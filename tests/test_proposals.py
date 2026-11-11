@@ -368,6 +368,9 @@ def test_real_retained_examples_benchmark_and_no_approval(tmp_path):
     assert benchmark["documentary_abstentions"] == 2 and benchmark["supported_rule_coverage"] == 0.6
     assert benchmark["precision"] == 1 and benchmark["normative_provenance_gaps"] == 0
     assert result["production_approvals"] == 0
+    exported = json.loads((tmp_path / "reports/madrid_fountains.table-schema.json").read_text(encoding="utf-8"))
+    location = next(f for f in exported["schema"]["fields"] if f["name"] == "UBICACION")
+    assert set(location["constraints"]["enum"]) == {"ZV", "VP"}
     with workspace(tmp_path / "examples.sqlite") as journal:
         assert all(not journal.load(pid)["decisions"] for pid in journal.list())
     with pytest.raises(ValueError, match="human-confirmed"):
