@@ -1,11 +1,11 @@
 {
   "schema_version": 2,
-  "runs": 84,
-  "database_bytes": 13295616,
-  "compressed_bytes": 4561755,
+  "runs": 87,
+  "database_bytes": 13684736,
+  "compressed_bytes": 4662536,
   "limit_bytes": 250000000,
   "archive_limit_bytes": 90000000,
   "capacity_warning": false,
-  "database_sha256": "4e255c9f3cfb00e19e1828a0c4cdeb99bd6be42523eaa22d6a226998230a0268",
-  "compressed_sha256": "2d3e106bc8567b37115d7b1ccf63c00597fdb1319e4dae039cc4b0867264bce8"
+  "database_sha256": "3d98b572f1ddbfee81eb09cffa4e42b957d33d98a3eeb1f7b21fedf3949c39cb",
+  "compressed_sha256": "f072490d24fa20627df22cfce961b5fa893bdf84dcb311576480bc20f93ef971"
 }
